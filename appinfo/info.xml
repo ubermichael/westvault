@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<info>
+    <id>westvault</id>
+    <name>West Vault</name>
+    <description>My first ownCloud app</description>
+    <licence>AGPL</licence>
+    <author>Michael Joyce</author>
+    <version>0.0.1</version>
+    <namespace>WestVault</namespace>
+    <category>other</category>
+    <dependencies>
+        <owncloud min-version="9.0" />
+    </dependencies>
+</info>
