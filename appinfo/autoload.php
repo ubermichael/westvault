@@ -1,8 +1,9 @@
 <?php
+
 /**
  * ownCloud - westvault
  *
- * This file is licensed under the Affero General Public License version 3 or
+ * This file is licensed under the MIT License version 3 or
  * later. See the COPYING file.
  *
  * @author Michael Joyce <ubermichael@gmail.com>

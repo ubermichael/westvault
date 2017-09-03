@@ -4,7 +4,7 @@
 
 <p><textarea id="echo-content">
 	Send this as ajax
-</textarea></p>
+    </textarea></p>
 <p><button id="echo">Send ajax request</button></p>
 
 Ajax response: <div id="echo-result"></div>

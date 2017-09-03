@@ -1,17 +1,17 @@
 <?php
-script('westvault', 'script');
-style('westvault', 'style');
+    script('westvault', 'script');
+    style('westvault', 'style');
 ?>
 
 <div id="app">
-	<div id="app-navigation">
-		<?php print_unescaped($this->inc('part.navigation')); ?>
-		<?php print_unescaped($this->inc('part.settings')); ?>
-	</div>
+    <div id="app-navigation">
+        <?php print_unescaped($this->inc('part.navigation')); ?>
+        <?php print_unescaped($this->inc('part.settings')); ?>
+    </div>
 
-	<div id="app-content">
-		<div id="app-content-wrapper">
-			<?php print_unescaped($this->inc('part.content')); ?>
-		</div>
-	</div>
+    <div id="app-content">
+        <div id="app-content-wrapper">
+            <?php print_unescaped($this->inc('part.content')); ?>
+        </div>
+    </div>
 </div>
