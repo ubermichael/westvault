@@ -5,7 +5,7 @@
     <description>OwnCloud-based front end for the West Vault preservation service.</description>
     <licence>MIT</licence>
     <author>Michael Joyce</author>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
     <namespace>WestVault</namespace>
     <category>other</category>
     <dependencies>
