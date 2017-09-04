@@ -1,8 +1,21 @@
 <h2>WestVault Settings</h2>
 
+<h3>Terms of Service</h3>
+<form>
+    <p>
+        <?php if ($_['pln_site_terms_checked']): ?>
+            The terms of service were last updated <?php p($_['pln_site_terms_checked']->format('c')); ?>.
+        <?php else: ?>
+            The terms of service have not been updated.
+        <?php endif ?>
+        <br>
+        <button id="pln_terms_refresh">Refresh</button>
+    </p>
+</form>
+
 <h3>Global Settings</h3>
 <?php if (isset($_['isAdmin']) && $_['isAdmin']): ?>
-    <form>
+    <form id="westvault_site">
         <p>
             <label for="pln_site_ignore">Ignored file names (one per line)</label><br>
             <textarea name="pln_site_ignore" id="pln_ignore" rows="6" cols="72"><?php echo $_['pln_site_ignore']; ?></textarea><br>
@@ -25,18 +38,7 @@
             <em>The PLN staging server is where deposits are sent for processing. It probably
                 ends in `api/sword/2.0/sd-iri`.</em>
         </p>
-        <h3>Terms of Service</h3>
-        <p>
-            <?php if ($_['pln_site_terms_checked']): ?>
-                The terms of service were last updated <?php p($_['pln_site_terms_checked']->format('c')); ?>.
-            <?php else: ?>
-                The terms of service have not been updated.
-            <?php endif ?>
-            <br>
-            <button id="pln_terms_refresh">Refresh</button>
-        </p>
-
-        <button id="admin_save">Save</button>
+        <button id="site_save">Save</button>
     </form>
 <?php else: ?>
     <div>
@@ -80,7 +82,7 @@
     <h3>Settings for <?php echo $group->getGID(); ?></h3>
     <?php if (in_array($group, $_['subAdminGroups'])): ?>
         <form>
-            <input type="hidden" value="group_gid" value="<?php echo $group->getGID(); ?>" />
+            <input type="hidden" name="group_gid" value="<?php echo $group->getGID(); ?>" />
 
             <p>
                 <label><?php echo $group->getGID(); ?> UUID</label><br>

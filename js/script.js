@@ -21,7 +21,7 @@
             error: function (jqXhr, status, error) {
                 alert("Status: " + status + " " + error);
                 console.log('error', [error, status, jqXhr]);
-            },
+            }
         });
     }
 
@@ -40,6 +40,29 @@
                 var url = OC.generateUrl('/apps/westvault/config/save-group');
                 var formData = $self.parent('form').serialize();
                 postConfig(url, formData);                
+            });
+        });
+        
+        $("#site_save").click(function (e) {
+            e.preventDefault();
+            var url = OC.generateUrl('/apps/westvault/config/save-site');
+            var formData = $("#westvault_site").serialize();
+            postConfig(url, formData);
+        });
+        
+        $("#pln_terms_refresh").click(function(e){
+            e.preventDefault();
+            var url = OC.generateUrl('/apps/westvault/config/refresh');
+            $.ajax(url, {
+                method: 'POST',
+                success: function (responseData, status, jqXhr) {
+                    alert(responseData.message);
+                    console.log(responseData.message);
+                },
+                error: function (jqXhr, status, error) {
+                    alert("Status: " + status + " " + error);
+                    console.log('error', [error, status, jqXhr]);
+                }
             });
         });
     });

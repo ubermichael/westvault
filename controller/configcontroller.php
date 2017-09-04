@@ -51,7 +51,7 @@ class ConfigController extends Controller {
 
         $uuids = [];
         foreach ($this->groupManager->getUserGroups($this->user) as $group) {
-            $uuids[$group->getGID()] = $this->config->getGroupValue('uuid', $group->getGID());
+            $uuids[$group->getGID()] = $this->config->getGroupValue('pln_group_uuid', $group->getGID());
         }
 
         $params = [
@@ -76,12 +76,18 @@ class ConfigController extends Controller {
     }
 
     public function refresh() {
-        
+//            'pln_site_terms' => unserialize($this->config->getAppValue('terms_of_use', 'N;')),
+//            'pln_site_terms_checked' => unserialize($this->config->getAppValue('terms_of_use_updated', 'N;')),
     }
 
     public function saveSite() {
         try {
-            
+            $this->config->setAppValue('pln_site_ignore', $this->request->getParam('pln_site_ignore'));
+            $this->config->setSystemValue('pln_site_checksum_type', $this->request->getParam('pln_site_checksum_type'));
+            $this->config->setSystemValue('pln_site_url', $this->request->getParam('pln_site_url'));
+            return new DataResponse([
+                'message' => 'The settings have been saved.'
+            ]);
         } catch (Exception $e) {
             return new DataResponse([
                 'message' => "Error saving settings. Some settings may not have been saved. \n" . $e->getMessage(),
@@ -89,6 +95,9 @@ class ConfigController extends Controller {
         }
     }
 
+    /**
+     * @NoAdminRequired
+     */
     public function saveGroup() {
         try {
             $this->config->setGroupValue('pln_group_uuid', $this->request->getParam('group_gid'), $this->request->getParam('pln_group_uuid'));
@@ -102,6 +111,9 @@ class ConfigController extends Controller {
         }
     }
 
+    /**
+     * @NoAdminRequired
+     */
     public function saveUser() {
         try {
             $this->config->setUserValue('pln_user_email', $this->user->getUID(), $this->request->getParam('pln_user_email'));
