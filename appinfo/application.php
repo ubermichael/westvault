@@ -44,7 +44,13 @@ class Application extends App {
         });
 
         $container->registerService('ConfigController', function($c) {
-            return new ConfigController($c->query('AppName'), $c->query('Request'), $c->query('User'), $c->query('GroupManager'));
+            return new ConfigController(
+                    $c->query('AppName'), 
+                    $c->query('Request'), 
+                    $c->query('User'), 
+                    $c->query('GroupManager'),
+                    $c->query('WestVaultConfig')
+            );
         });
     }
 
