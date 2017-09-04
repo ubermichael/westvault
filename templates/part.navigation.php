@@ -1,8 +1,7 @@
-<ul>
-    <li>
-        <a href="#">File list</a>
-    </li>
-    <li>
-        <a href="#">Settings</a>
-    </li>
-</ul>
+<div id="app-navigation">
+    <ul>
+        <?php foreach ($_['navigation'] as $n): ?>
+            <li><a href="<?php p($n['url']); ?>"><?php p($n['name']); ?></a></li>
+        <?php endforeach; ?>
+    </ul>
+</div>

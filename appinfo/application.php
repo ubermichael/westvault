@@ -10,14 +10,19 @@
 namespace OCA\WestVault\AppInfo;
 
 use OCA\WestVault\Controller\ConfigController;
+use OCA\WestVault\Service\Navigation;
 use OCA\WestVault\Service\WestVaultConfig;
 use OCP\AppFramework\App;
+use OCP\IContainer;
 
 class Application extends App {
 
     public function __construct(array $urlParams = array()) {
         parent::__construct('westvault', $urlParams);
 
+        /**
+         * IContainer
+         */
         $container = $this->getContainer();
 
         $container->registerService('Config', function($c) {
@@ -42,6 +47,10 @@ class Application extends App {
         $container->registerService('WestVaultConfig', function($c) {
             return new WestVaultConfig($c->query('Config'), $c->query('AppName'));
         });
+        
+        $container->registerService('WestVaultNavigation', function($c){
+            return new Navigation($c->query('OCP\IURLGenerator'));
+        });
 
         $container->registerService('ConfigController', function($c) {
             return new ConfigController(
@@ -49,7 +58,8 @@ class Application extends App {
                     $c->query('Request'), 
                     $c->query('User'), 
                     $c->query('GroupManager'),
-                    $c->query('WestVaultConfig')
+                    $c->query('WestVaultConfig'),
+                    $c->query('WestVaultNavigation')
             );
         });
     }

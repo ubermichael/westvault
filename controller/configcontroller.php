@@ -11,6 +11,7 @@ namespace OCA\WestVault\Controller;
 
 use DateTime;
 use Exception;
+use OCA\WestVault\Service\Navigation;
 use OCA\WestVault\Service\WestVaultConfig;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\DataResponse;
@@ -35,12 +36,18 @@ class ConfigController extends Controller {
      * @var WestVaultConfig
      */
     private $config;
+    
+    /**
+     * @var Navigation
+     */
+    private $navigation;
 
-    public function __construct($appName, IRequest $request, IUser $user, IGroupManager $groupManager, WestVaultConfig $config) {
+    public function __construct($appName, IRequest $request, IUser $user, IGroupManager $groupManager, WestVaultConfig $config, Navigation $navigation) {
         parent::__construct($appName, $request);
         $this->user = $user;
         $this->groupManager = $groupManager;
         $this->config = $config;
+        $this->navigation = $navigation;
     }
 
     /**
@@ -55,6 +62,7 @@ class ConfigController extends Controller {
         }
 
         $params = [
+            'navigation' => $this->navigation->linkList(),
             'user' => $this->user,
             'isAdmin' => $this->groupManager->isAdmin($this->user->getUID()),
             'groups' => $this->groupManager->getUserGroups($this->user),
