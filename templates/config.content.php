@@ -3,7 +3,6 @@
 <h3>Global Settings</h3>
 <?php if (isset($_['isAdmin']) && $_['isAdmin']): ?>
     <form>
-        <input type="hidden" value="settings_type" value="global"/>
         <p>
             <label for="pln_site_ignore">Ignored file names (one per line)</label><br>
             <textarea name="pln_site_ignore" id="pln_ignore" rows="6" cols="72"><?php echo $_['pln_site_ignore']; ?></textarea><br>
@@ -37,7 +36,7 @@
             <button id="pln_terms_refresh">Refresh</button>
         </p>
 
-        <button id="pln_save">Save</button>
+        <button id="admin_save">Save</button>
     </form>
 <?php else: ?>
     <div>
@@ -53,9 +52,9 @@
         <p>The checksum method to use when validating deposits.</p>
         <blockquote>
             <?php if ($_['pln_site_checksum_type'] === 'md5'): ?>
-                <b>MD5</b>: <em>Use message digest algorithm for calculating checksums.</em>
+                <b>MD5</b>: Use message digest algorithm for calculating checksums.
             <?php elseif ($_['pln_site_checksum_type'] === 'sha1'): ?>
-                <b>SHA-1</b>: <em>Use secure hash algorithm 1 for calculating checksums.</em>
+                <b>SHA-1</b>: Use secure hash algorithm 1 for calculating checksums.
             <?php endif ?>
         </blockquote>
 
@@ -66,7 +65,13 @@
         </blockquote>
 
         <h4>Terms of Service</h4>
-        <p>The terms of service were last updated <?php p($_['pln_site_terms_checked']->format('c')); ?>.</p>
+        <p>
+            <?php if ($_['pln_site_terms_checked']): ?>
+                The terms of service were last updated <?php p($_['pln_site_terms_checked']->format('c')); ?>.
+            <?php else: ?>
+                The terms of service have never been updated.
+            <?php endif ?>
+        </p>
 
     </div>
 <?php endif ?>
@@ -75,16 +80,15 @@
     <h3>Settings for <?php echo $group->getGID(); ?></h3>
     <?php if (in_array($group, $_['subAdminGroups'])): ?>
         <form>
-            <input type="hidden" value="settings_type" value="group"/>
             <input type="hidden" value="group_gid" value="<?php echo $group->getGID(); ?>" />
 
             <p>
                 <label><?php echo $group->getGID(); ?> UUID</label><br>
-                <input value="<?php echo $_['pln_uuids'][$group->getGID()]; ?>" /><br>
+                <input value="<?php echo $_['pln_uuids'][$group->getGID()]; ?>" name="pln_group_uuid" id="pln_group_uuid" /><br>
                 <em>Identifier for the staging server.</em>
             </p>
 
-            <button id="group_save">Save</button>
+            <button class="group_save">Save</button>
         </form>
     <?php else: ?>
         <div>
@@ -97,9 +101,7 @@
     <?php endif; ?>
 <?php endforeach ?>
 
-<form>
-    <input type="hidden" value="settings_type" value="user"/>
-
+<form id="westvault_user">
     <h3>User Settings</h3>    
     <p>
         <label for="pln_user_email">Notification address</label><br>
@@ -107,8 +109,8 @@
         <em>Notification emails will be sent to this address.</em>
     </p>
     <p>
-        <label for="pln_site_ignore">Ignored file names (one per line)</label><br>
-        <textarea name="pln_site_ignore" id="pln_ignore" rows="6" cols="72"><?php echo $_['pln_site_ignore']; ?></textarea><br>
+        <label for="pln_user_ignore">Ignored file names (one per line)</label><br>
+        <textarea name="pln_user_ignore" id="pln_ignore" rows="6" cols="72"><?php echo $_['pln_user_ignore']; ?></textarea><br>
         <em>Examples: .* to ignore files that start with a dot, *.log to ignore logging files.</em>
     </p>
 
@@ -146,7 +148,7 @@
         <?php endif; ?>
     </p>
     <p>
-        <button id="pln_save">Save</button>
+        <button id="user_save">Save</button>
     </p>
 
 </form>

@@ -35,8 +35,8 @@ class WestVaultConfig {
      * @param string $key
      * @return string
      */
-    public function getSystemValue($key) {
-        return $this->config->getSystemValue($key);
+    public function getSystemValue($key, $default = '') {
+        return $this->config->getSystemValue($key, $default);
     }
 
     /**
@@ -57,8 +57,8 @@ class WestVaultConfig {
      * @param string $key
      * @return string
      */
-    public function getAppValue($key) {
-        return $this->config->getAppValue($this->appName, $key);
+    public function getAppValue($key, $default = '') {
+        return $this->config->getAppValue($this->appName, $key, $default);
     }
 
     /**
@@ -80,8 +80,8 @@ class WestVaultConfig {
      * @param string $groupId
      * @return string
      */
-    public function getGroupValue($key, $groupId) {
-        return $this->config->getAppValue($this->appName, 'group:' . $groupId . ':' . $key);        
+    public function getGroupValue($key, $groupId, $default = '') {
+        return $this->config->getAppValue($this->appName, 'group:' . $groupId . ':' . $key, $default);        
     }
     
     /**
@@ -103,8 +103,8 @@ class WestVaultConfig {
      * @param string $key
      * @return string
      */
-    public function getUserValue($key, $userId) {
-        return $this->config->getUserValue($userId, $this->appName, $key);
+    public function getUserValue($key, $userId, $default = '') {
+        return $this->config->getUserValue($userId, $this->appName, $key, $default);
     }
 
     /**

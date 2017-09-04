@@ -22,5 +22,7 @@ return [
         ['name' => 'page#index', 'url' => '/', 'verb' => 'GET'],
         ['name' => 'page#do_echo', 'url' => '/echo', 'verb' => 'POST'],
         ['name' => 'config#index', 'url' => '/config', 'verb' => 'GET'],
+        ['name' => 'config#saveUser', 'url' => '/config/save-user', 'verb' => 'POST'],
+        ['name' => 'config#saveGroup', 'url' => '/config/save-group', 'verb' => 'POST'],
     ]
 ];

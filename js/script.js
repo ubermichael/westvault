@@ -10,21 +10,37 @@
 
 (function ($, OC) {
 
-    $(document).ready(function () {
-        $('#hello').click(function () {
-            alert('Hello from your script file');
+    function postConfig(url, formData) {
+        $.ajax(url, {
+            method: 'POST',
+            data: formData,
+            success: function (responseData, status, jqXhr) {
+                alert(responseData.message);
+                console.log(responseData.message);
+            },
+            error: function (jqXhr, status, error) {
+                alert("Status: " + status + " " + error);
+                console.log('error', [error, status, jqXhr]);
+            },
         });
+    }
 
-        $('#echo').click(function () {
-            var url = OC.generateUrl('/apps/westvault/echo');
-            var data = {
-                echo: $('#echo-content').val()
-            };
-
-            $.post(url, data).success(function (response) {
-                $('#echo-result').text(response.echo);
+    $(document).ready(function () {
+        $("#user_save").click(function (e) {
+            e.preventDefault();
+            var url = OC.generateUrl('/apps/westvault/config/save-user');
+            var formData = $("#westvault_user").serialize();
+            postConfig(url, formData);
+        });
+        
+        $(".group_save").each(function(){
+            var $self = $(this); // closure.
+            $self.click(function(e){
+                e.preventDefault();
+                var url = OC.generateUrl('/apps/westvault/config/save-group');
+                var formData = $self.parent('form').serialize();
+                postConfig(url, formData);                
             });
-
         });
     });
 
