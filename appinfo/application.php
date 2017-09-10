@@ -10,6 +10,8 @@
 namespace OCA\WestVault\AppInfo;
 
 use OCA\WestVault\Controller\ConfigController;
+use OCA\WestVault\Controller\PageController;
+use OCA\WestVault\Hooks\GroupHooks;
 use OCA\WestVault\Service\Navigation;
 use OCA\WestVault\Service\WestVaultConfig;
 use OCP\AppFramework\App;
@@ -17,8 +19,8 @@ use OCP\IContainer;
 
 class Application extends App {
 
-    public function __construct(array $urlParams = array()) {
-        parent::__construct('westvault', $urlParams);
+    public function __construct($appName = 'westvault', array $urlParams = array()) {
+        parent::__construct($appName, $urlParams);
 
         /**
          * IContainer
@@ -52,6 +54,15 @@ class Application extends App {
             return new Navigation($c->query('OCP\IURLGenerator'));
         });
 
+        $container->registerService('PageController', function($c) {
+            return new PageController(
+                    $c->query('AppName'), 
+                    $c->query('Request'), 
+                    $c->query('User'), 
+                    $c->query('WestVaultNavigation')
+            );
+        });
+        
         $container->registerService('ConfigController', function($c) {
             return new ConfigController(
                     $c->query('AppName'), 
@@ -60,6 +71,13 @@ class Application extends App {
                     $c->query('GroupManager'),
                     $c->query('WestVaultConfig'),
                     $c->query('WestVaultNavigation')
+            );
+        });
+        
+        $container->registerService('GroupHooks', function($c) {
+            return new GroupHooks(
+                    $c->query('GroupManager'),
+                    $c->query('WestVaultConfig')
             );
         });
     }

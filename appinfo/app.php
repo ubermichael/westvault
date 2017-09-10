@@ -16,8 +16,9 @@ use OCP\AppFramework\App;
 
 require_once __DIR__ . '/autoload.php';
 
-$app = new App('westvault');
+$app = new Application('westvault');
 $container = $app->getContainer();
+$container->query('GroupHooks')->register();
 
 $container->query('OCP\INavigationManager')->add(function () use ($container) {
     $urlGenerator = $container->query('OCP\IURLGenerator');

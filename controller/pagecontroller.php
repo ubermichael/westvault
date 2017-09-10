@@ -12,18 +12,29 @@
 
 namespace OCA\WestVault\Controller;
 
-use OCP\IRequest;
-use OCP\AppFramework\Http\TemplateResponse;
-use OCP\AppFramework\Http\DataResponse;
+use OCA\WestVault\Service\Navigation;
 use OCP\AppFramework\Controller;
+use OCP\AppFramework\Http\DataResponse;
+use OCP\AppFramework\Http\TemplateResponse;
+use OCP\IRequest;
+use OCP\IUser;
 
 class PageController extends Controller {
 
-    private $userId;
+    /**
+     * @var IUser
+     */
+    private $user;
+    
+    /**
+     * @var Navigation
+     */
+    private $navigation;
 
-    public function __construct($AppName, IRequest $request, $UserId) {
+    public function __construct($AppName, IRequest $request, IUser $user, Navigation $navigation) {        
         parent::__construct($AppName, $request);
-        $this->userId = $UserId;
+        $this->user = $user;
+        $this->navigation = $navigation;
     }
 
     /**
@@ -37,16 +48,9 @@ class PageController extends Controller {
      * @NoCSRFRequired
      */
     public function index() {
-        $params = ['user' => $this->userId];
+        $params = [
+            'navigation' => $this->navigation->linkList(),
+        ];
         return new TemplateResponse('westvault', 'main', $params);  // templates/main.php
     }
-
-    /**
-     * Simply method that posts back the payload of the request
-     * @NoAdminRequired
-     */
-    public function doEcho($echo) {
-        return new DataResponse(['echo' => $echo]);
-    }
-
 }
