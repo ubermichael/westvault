@@ -80,19 +80,6 @@
 
 <?php foreach ($_['groups'] as $group): ?>
     <h3>Settings for <?php echo $group->getGID(); ?></h3>
-    <?php if (in_array($group, $_['subAdminGroups'])): ?>
-        <form>
-            <input type="hidden" name="group_gid" value="<?php echo $group->getGID(); ?>" />
-
-            <p>
-                <label><?php echo $group->getGID(); ?> UUID</label><br>
-                <input value="<?php echo $_['pln_uuids'][$group->getGID()]; ?>" name="pln_group_uuid" id="pln_group_uuid" /><br>
-                <em>Identifier for the staging server.</em>
-            </p>
-
-            <button class="group_save">Save</button>
-        </form>
-    <?php else: ?>
         <div>
             <h4>UUID</h4>
             <p>Identifier for the staging server.</p>
@@ -100,7 +87,6 @@
                 <?php echo $_['pln_uuids'][$group->getGID()]; ?>
             </blockquote>
         </div>
-    <?php endif; ?>
 <?php endforeach ?>
 
 <form id="westvault_user">
