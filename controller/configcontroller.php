@@ -55,24 +55,19 @@ class ConfigController extends Controller {
      * @NoCSRFRequired
      */
     public function index() {
-
-        $uuids = [];
-        foreach ($this->groupManager->getUserGroups($this->user) as $group) {
-            $uuids[$group->getGID()] = $this->config->getGroupValue('pln_group_uuid', $group->getGID());
-        }
-
         $params = [
             'navigation' => $this->navigation->linkList(),
+            
             'user' => $this->user,
             'isAdmin' => $this->groupManager->isAdmin($this->user->getUID()),
-            'groups' => $this->groupManager->getUserGroups($this->user),
-            'subAdminGroups' => $this->groupManager->getSubAdmin()->getSubAdminsGroups($this->user),
+            
             'pln_site_ignore' => $this->config->getAppValue('pln_site_ignore'),
             'pln_site_checksum_type' => $this->config->getAppValue('pln_site_checksum_type', 'sha1'),
             'pln_site_url' => $this->config->getAppValue('pln_site_url'),
             'pln_site_terms' => unserialize($this->config->getAppValue('terms_of_use', 'N;')),
             'pln_site_terms_checked' => unserialize($this->config->getAppValue('terms_of_use_updated', 'N;')),
-            'pln_uuids' => $uuids,
+            
+            'pln_user_uuid' => $this->config->getUserValue('uuid', $this->user->getUID()),
             'pln_user_email' => $this->config->getUserValue('pln_user_email', $this->user->getUID()),
             'pln_user_ignore' => $this->config->getUserValue('pln_user_ignore', $this->user->getUID()),
             'pln_user_preserved_folder' => $this->config->getUserValue('pln_user_preserved_folder', $this->user->getUID(), 'lockss-preserved'),
@@ -93,22 +88,6 @@ class ConfigController extends Controller {
             $this->config->setAppValue('pln_site_ignore', $this->request->getParam('pln_site_ignore'));
             $this->config->setSystemValue('pln_site_checksum_type', $this->request->getParam('pln_site_checksum_type'));
             $this->config->setSystemValue('pln_site_url', $this->request->getParam('pln_site_url'));
-            return new DataResponse([
-                'message' => 'The settings have been saved.'
-            ]);
-        } catch (Exception $e) {
-            return new DataResponse([
-                'message' => "Error saving settings. Some settings may not have been saved. \n" . $e->getMessage(),
-            ]);
-        }
-    }
-
-    /**
-     * @NoAdminRequired
-     */
-    public function saveGroup() {
-        try {
-            $this->config->setGroupValue('pln_group_uuid', $this->request->getParam('group_gid'), $this->request->getParam('pln_group_uuid'));
             return new DataResponse([
                 'message' => 'The settings have been saved.'
             ]);

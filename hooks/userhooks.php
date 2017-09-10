@@ -38,7 +38,7 @@ class UserHooks {
     
     public function register() {
         $callback = function(IUser $user) {
-            $this->config->setUserValue('uuid', $user->getUID(), Uuid::uuid4()->toString());
+            $this->config->setUserValue('pln_user_uuid', $user->getUID(), Uuid::uuid4()->toString());
         };
         $this->manager->listen('\OC\User', 'postCreateUser', $callback);
     }

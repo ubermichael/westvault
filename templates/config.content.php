@@ -78,17 +78,6 @@
     </div>
 <?php endif ?>
 
-<?php foreach ($_['groups'] as $group): ?>
-    <h3>Settings for <?php echo $group->getGID(); ?></h3>
-        <div>
-            <h4>UUID</h4>
-            <p>Identifier for the staging server.</p>
-            <blockquote>
-                <?php echo $_['pln_uuids'][$group->getGID()]; ?>
-            </blockquote>
-        </div>
-<?php endforeach ?>
-
 <form id="westvault_user">
     <h3>User Settings</h3>    
     <p>
@@ -135,6 +124,17 @@
             <input type="checkbox" name="pln_user_agreed" id="pln_user_agreed" value="agree"/><br>
         <?php endif; ?>
     </p>
+    <h4>User UUID</h4>
+    <p>
+        The PLN uses this string to associate deposits with your account.
+    </p>
+    <blockquote>
+        <?php if ($_['pln_user_uuid']): ?>
+            <?php echo $_['pln_user_uuid']; ?>
+        <?php else: ?>
+            <i>You do not have a UUID. All users other than OwnCloud admininstrators should have a UUID.</i>
+        <?php endif ?>
+    </blockquote>
     <p>
         <button id="user_save">Save</button>
     </p>
