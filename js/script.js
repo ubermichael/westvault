@@ -33,16 +33,6 @@
             postConfig(url, formData);
         });
         
-        $(".group_save").each(function(){
-            var $self = $(this); // closure.
-            $self.click(function(e){
-                e.preventDefault();
-                var url = OC.generateUrl('/apps/westvault/config/save-group');
-                var formData = $self.parent('form').serialize();
-                postConfig(url, formData);                
-            });
-        });
-        
         $("#site_save").click(function (e) {
             e.preventDefault();
             var url = OC.generateUrl('/apps/westvault/config/save-site');
@@ -56,8 +46,8 @@
             $.ajax(url, {
                 method: 'POST',
                 success: function (responseData, status, jqXhr) {
-                    alert(responseData.message);
-                    console.log(responseData.message);
+                    alert(responseData.result);
+                    console.log(responseData);
                 },
                 error: function (jqXhr, status, error) {
                     alert("Status: " + status + " " + error);

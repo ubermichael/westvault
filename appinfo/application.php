@@ -13,6 +13,7 @@ use OCA\WestVault\Controller\ConfigController;
 use OCA\WestVault\Controller\PageController;
 use OCA\WestVault\Hooks\UserHooks;
 use OCA\WestVault\Service\Navigation;
+use OCA\WestVault\Service\SwordClient;
 use OCA\WestVault\Service\WestVaultConfig;
 use OCP\AppFramework\App;
 use OCP\IContainer;
@@ -47,7 +48,10 @@ class Application extends App {
         });
 
         $container->registerService('WestVaultConfig', function($c) {
-            return new WestVaultConfig($c->query('Config'), $c->query('AppName'));
+            return new WestVaultConfig(
+                    $c->query('Config'),
+                    $c->query('AppName')
+            );
         });
         
         $container->registerService('WestVaultNavigation', function($c){
@@ -66,7 +70,7 @@ class Application extends App {
         $container->registerService('SwordClient', function($c){
             return new SwordClient(
                 $c->query('WestVaultConfig'),
-                $c->query($c->query('OCP\IURLGenerator'))
+                $c->query('OCP\IURLGenerator')
             );
         });
         
@@ -77,7 +81,8 @@ class Application extends App {
                     $c->query('User'), 
                     $c->query('GroupManager'),
                     $c->query('WestVaultConfig'),
-                    $c->query('WestVaultNavigation')
+                    $c->query('WestVaultNavigation'),
+                    $c->query('SwordClient')
             );
         });
         

@@ -12,8 +12,9 @@ namespace OCA\WestVault\Service;
 use DOMDocument;
 use GuzzleHttp\Client;
 use GuzzleHttp\Stream\Stream;
-use OCA\CoppulPln\Util\Namespaces;
+use OCA\WestVault\Util\Namespaces;
 use OCP\IURLGenerator;
+use OCP\IUser;
 use SimpleXMLElement;
 
 /**
@@ -21,7 +22,7 @@ use SimpleXMLElement;
  *
  * @author Michael Joyce <ubermichael@gmail.com>
  */
-class SwordSlient {
+class SwordClient {
 
     /**
      * @var WestVaultConfig
@@ -38,12 +39,6 @@ class SwordSlient {
      * @var Namespaces
      */
     private $ns;
-
-    /**
-     *
-     * @var SimpleXMLElement
-     */
-    private $serviceDocument;
 
     /**
      *
@@ -74,54 +69,56 @@ class SwordSlient {
         return $this->httpClient;
     }
 
-    protected function fetchServiceDocument(\OCP\IGroup $group) {
-        $uuid = $this->config->getGroupValue('pln_group_uuid', $group->getGID());
-        $sdIri = $this->config->getAppValue('pln_site_url');
-        if (!$uuid || !$sdIri) {
+    protected function fetchServiceDocument(IUser $user) {
+        $sdIri = $this->config->getSystemValue('pln_site_url');
+        if (!$sdIri) {
             return;
         }
+        $uuid = $this->config->getUserValue('pln_user_uuid', $user->getUID());
         $client = $this->getClient();
         $headers = array(
             'On-Behalf-Of' => $uuid,
-            'Group Name' => $group->getGID(),
+            'User Name' => $user->getDisplayName(),
         );
 
         $response = $client->get($sdIri, ['headers' => $headers]);
         $xml = $response->xml();
         $this->ns->registerNamespaces($xml);
-        $this->serviceDocument = $xml;
+        return $xml;
     }
 
-    protected function requireServiceDocument() {
-        if (!$this->serviceDocument) {
-            $this->fetchServiceDocument();
+    public function getServiceDocument(IUser $user) {
+        $xml = $this->fetchServiceDocument($user);
+        return $xml->serviceDocument;
+    }
+    
+    public function isAccepting(IUser $user) {
+        $serviceDocument = $this->getServiceDocument($user);
+        if( ! $serviceDocument) {
+            return false;
         }
+        return $serviceDocument->path('//pkp:pln_accepting/@is_accepting')[0] == "Yes";
     }
 
-    public function getServiceDocument() {
-        $this->requireServiceDocument();
-        return $this->serviceDocument;
-    }
-
-    public function getTermsOfUse() {
-        $this->requireServiceDocument();
-        if (!$this->serviceDocument) {
-            return null;
+    public function getTermsOfUse(IUser $user) {
+        $serviceDocument = $this->getServiceDocument($user);
+        if( ! $serviceDocument) {
+            return;
         }
-        $termsXml = $this->serviceDocument->xpath('//pkp:terms_of_use/pkp:*');
+        $serviceDocument->xpath('//pkp:terms_of_use/pkp:*');
         $terms = array();
-        foreach ($termsXml as $xml) {
+        foreach($termsXml as $xml) {
             $terms[] = array(
                 'text' => "{$xml}",
                 'id' => $xml->getName(),
-                'updated' => (string) $xml['updated'],
+                'updated' => (string)$xml['updated'],
             );
         }
         return $terms;
     }
 
-    public function getColIri() {
-        $this->requireServiceDocument();
+    public function getColIri(IUser $user) {
+        $this->requireServiceDocument($user);
         if (!$this->serviceDocument) {
             return null;
         }

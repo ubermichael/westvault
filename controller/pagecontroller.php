@@ -14,7 +14,6 @@ namespace OCA\WestVault\Controller;
 
 use OCA\WestVault\Service\Navigation;
 use OCP\AppFramework\Controller;
-use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\IRequest;
 use OCP\IUser;
