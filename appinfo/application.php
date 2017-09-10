@@ -11,7 +11,7 @@ namespace OCA\WestVault\AppInfo;
 
 use OCA\WestVault\Controller\ConfigController;
 use OCA\WestVault\Controller\PageController;
-use OCA\WestVault\Hooks\GroupHooks;
+use OCA\WestVault\Hooks\UserHooks;
 use OCA\WestVault\Service\Navigation;
 use OCA\WestVault\Service\WestVaultConfig;
 use OCP\AppFramework\App;
@@ -81,9 +81,9 @@ class Application extends App {
             );
         });
         
-        $container->registerService('GroupHooks', function($c) {
-            return new GroupHooks(
-                    $c->query('GroupManager'),
+        $container->registerService('UserHooks', function($c) {
+            return new UserHooks(
+                    $c->query('ServerContainer')->getUserManager(),
                     $c->query('WestVaultConfig')
             );
         });

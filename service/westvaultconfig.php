@@ -73,30 +73,6 @@ class WestVaultConfig {
     }
 
     /**
-     * Group settings are stored as app values with specially constructed keys.
-     * Examples of group settings are the UUID for the group.
-     * 
-     * @param string $key
-     * @param string $groupId
-     * @return string
-     */
-    public function getGroupValue($key, $groupId, $default = '') {
-        return $this->config->getAppValue($this->appName, 'group:' . $groupId . ':' . $key, $default);        
-    }
-    
-    /**
-     * Set a group value.
-     * 
-     * @param string $key
-     * @param string $groupId
-     * @param string $value
-     * @return string
-     */
-    public function setGroupValue($key, $groupId, $value) {
-        return $this->config->setAppValue($this->appName, 'group:' . $groupId . ':' . $key, $value);        
-    }
-
-    /**
      * Get a user value. Examples of user values include accepting the terms
      * of service.
      * 
@@ -114,8 +90,10 @@ class WestVaultConfig {
      * @return string
      */
     public function setUserValue($key, $userId, $value) {
+        if($key === 'uuid' && $this->config->getUserValue($userId, 'uuid', null) !== null) {
+            return;
+        }
         $this->config->setUserValue($userId, $this->appName, $key, $value);
     }
-    
-    
+       
 }
