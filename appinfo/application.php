@@ -63,6 +63,13 @@ class Application extends App {
             );
         });
         
+        $container->registerService('SwordClient', function($c){
+            return new SwordClient(
+                $c->query('WestVaultConfig'),
+                $c->query($c->query('OCP\IURLGenerator'))
+            );
+        });
+        
         $container->registerService('ConfigController', function($c) {
             return new ConfigController(
                     $c->query('AppName'), 
