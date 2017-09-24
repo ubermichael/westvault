@@ -1,3 +1,10 @@
-#hello {
-    color: red;
+/*  make the settings page suck a bit less. */
+blockquote {
+    margin: 2em;
+    padding: 2em;
+    border: 1px solid lightgrey;
+}
+
+div#app-content {
+    padding-left: 1em;
 }

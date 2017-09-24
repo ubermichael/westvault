@@ -2,27 +2,29 @@
 
 <h3>Terms of Service</h3>
 <form id="westvault_terms">
-    <?php if ($_['pln_user_terms_checked']): ?>
-        <ol>
-            <?php foreach ($_['pln_user_terms'] as $term): ?>
-                <li><?php p($term['text']); ?><br>
-                    <em>updated <?php p($term['updated']); ?></em>
-                </li>
-            <?php endforeach; ?>
-        </ol>
-        <p>
-            <?php if ($_['pln_user_agreed']): ?>
-                Agreement date: <?php p($_['pln_user_agreed']->format('c')); ?>
-            <?php else: ?>
-                <label for="pln_user_agreed">I agree to abide by the terms of use.</label>
-                <input type="checkbox" name="pln_user_agreed" id="pln_user_agreed" value="agree"/><br>
-                <button id="terms_agree">Save Agreement</button>
-            <?php endif; ?>
-        </p>
-    <?php else: ?>
-        <p>The terms of service have not been updated.</p>
-    <?php endif ?>
+    <blockquote>
+        <?php if ($_['pln_user_terms_checked']): ?>
+            <ol>
+                <?php foreach ($_['pln_user_terms'] as $term): ?>
+                    <li><?php p($term['text']); ?><br>
+                        <em>updated <?php p($term['updated']); ?></em>
+                    </li>
+                <?php endforeach; ?>
+            </ol>
+        <?php else: ?>
+            <p>The terms of service have not been updated.</p>
+        <?php endif ?>
+    </blockquote>
     <button id="pln_terms_refresh">Refresh Terms</button>
+    <p>
+        <?php if ($_['pln_user_agreed']): ?>
+            Agreement date: <?php p($_['pln_user_agreed']->format('c')); ?>
+        <?php else: ?>
+            <label for="pln_user_agreed">I agree to abide by the terms of use.</label>
+            <input type="checkbox" name="pln_user_agreed" id="pln_user_agreed" value="agree"/><br>
+            <button id="terms_agree">Save Agreement</button>
+        <?php endif; ?>
+    </p>
 </form>
 
 <h3>Global Settings</h3>
