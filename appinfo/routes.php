@@ -23,8 +23,8 @@ return [
         ['name' => 'page#do_echo', 'url' => '/echo', 'verb' => 'POST'],
         ['name' => 'config#index', 'url' => '/config', 'verb' => 'GET'],
         ['name' => 'config#saveUser', 'url' => '/config/save-user', 'verb' => 'POST'],
-        ['name' => 'config#saveGroup', 'url' => '/config/save-group', 'verb' => 'POST'],
         ['name' => 'config#saveSite', 'url' => '/config/save-site', 'verb' => 'POST'],
+        ['name' => 'config#saveAgreement', 'url' => '/config/save-agreement', 'verb' => 'POST'],
         ['name' => 'config#refresh', 'url' => '/config/refresh', 'verb' => 'POST'],
     ]
 ];

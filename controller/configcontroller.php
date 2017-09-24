@@ -68,9 +68,9 @@ class ConfigController extends Controller {
             'isAdmin' => $this->groupManager->isAdmin($this->user->getUID()),
             'pln_site_ignore' => $this->config->getAppValue('pln_site_ignore'),
             'pln_site_checksum_type' => $this->config->getAppValue('pln_site_checksum_type', 'sha1'),
-            'pln_site_url' => $this->config->getAppValue('pln_site_url'),
-            'pln_site_terms' => unserialize($this->config->getAppValue('pln_terms_of_use', 'N;')),
-            'pln_site_terms_checked' => unserialize($this->config->getAppValue('pln_terms_of_use_updated', 'N;')),
+            'pln_site_url' => $this->config->getSystemValue('pln_site_url'),
+            'pln_user_terms' => unserialize($this->config->getUserValue('pln_terms_of_use', $this->user->getUID(), 'N;')),
+            'pln_user_terms_checked' => $this->config->getUserValue('pln_terms_of_use_updated', $this->user->getUID(), ''),
             'pln_user_uuid' => $this->config->getUserValue('pln_user_uuid', $this->user->getUID()),
             'pln_user_email' => $this->config->getUserValue('pln_user_email', $this->user->getUID()),
             'pln_user_ignore' => $this->config->getUserValue('pln_user_ignore', $this->user->getUID()),
@@ -86,7 +86,7 @@ class ConfigController extends Controller {
      * @NoAdminRequired
      */
     public function refresh() {
-        if( ! $this->client) {
+        if (!$this->client) {
             return new DataResponse(array(
                 'status' => 'failure',
                 'result' => 'Cannot create sword client.',
@@ -94,24 +94,23 @@ class ConfigController extends Controller {
         }
         try {
             $newTerms = $this->client->getTermsOfUse($this->user);
+            $updated = $this->client->getTermsUpdated($this->user);
             $result = 'The terms of service have not changed since the last time they were checked.';
-            if(serialize($newTerms) !== $this->config->getAppValue('pln_terms_of_use', 'N;')) {
-                $result = 'The terms of service have been updated.';
-                $updated = new DateTime();
-                $this->config->setAppValue('pln_terms_of_use', serialize($newTerms));
-                $this->config->setAppValue('pln_terms_of_use_updated', serialize($updated));
-                return new DataResponse(array(
-                    'status' => 'success',
-                    'result' => $result,
-                    'terms' => $newTerms,
-                    'updated' => $updated,
-                ));
-            }
+//            if($updated !== $this->config->getUserValue('pln_terms_of_use_updated', $this->user->getUID(), '')) {
+            $result = 'The terms of service have been updated.';
+            $this->config->setUserValue('pln_terms_of_use', $this->user->getUID(), serialize($newTerms));
+            $this->config->setUserValue('pln_terms_of_use_updated', $this->user->getUID(), $updated);
+//            }
+            return new DataResponse(array(
+                'status' => 'success',
+                'result' => $result,
+                'terms' => $newTerms,
+                'updated' => $updated,
+            ));
         } catch (Exception $ex) {
-            error_log($ex->getMessage());
             return new DataResponse(array(
                 'status' => 'failure',
-                'result' => 'Error refreshing the terms of use: ' . $ex->getMessage(),
+                'result' => 'Error refreshing the terms of use: ' . $ex->getMessage() . ' at ' . $ex->getFile() . '#' . $ex->getLine(),
             ));
         }
     }
@@ -134,17 +133,32 @@ class ConfigController extends Controller {
     /**
      * @NoAdminRequired
      */
+    public function saveAgreement() {
+        try {
+            if ($this->request->getParam('pln_user_agreed') === 'agree') {
+                $this->config->setUserValue('pln_user_agreed', $this->user->getUID(), serialize(new DateTime()));
+            } else {
+                $this->config->setUserValue('pln_user_agreed', $this->user->getUID(), serialize(null));
+            }
+            return new DataResponse([
+                'message' => 'The settings have been saved.'
+            ]);
+        } catch (Exception $e) {
+            return new DataResponse([
+                'message' => "Error saving settings. Some settings may not have been saved. \n" . $e->getMessage(),
+            ]);
+        }
+    }
+
+    /**
+     * @NoAdminRequired
+     */
     public function saveUser() {
         try {
             $this->config->setUserValue('pln_user_email', $this->user->getUID(), $this->request->getParam('pln_user_email'));
             $this->config->setUserValue('pln_user_ignore', $this->user->getUID(), $this->request->getParam('pln_user_ignore'));
             $this->config->setUserValue('pln_user_preserved_folder', $this->user->getUID(), $this->request->getParam('pln_user_preserved_folder'));
             $this->config->setUserValue('pln_user_restored_folder', $this->user->getUID(), $this->request->getParam('pln_user_restored_folder'));
-            if ($this->request->getParam('pln_user_agreed') === 'agree') {
-                $this->config->setUserValue('pln_user_agreed', $this->user->getUID(), serialize(new DateTime()));
-            } else {
-                $this->config->setUserValue('pln_user_agreed', $this->user->getUID(), serialize(null));
-            }
             $this->config->setUserValue('pln_user_cleanup', $this->user->getUID(), serialize('agreed' === $this->request->getParam('pln_user_cleanup')));
             return new DataResponse([
                 'message' => 'The settings have been saved.'

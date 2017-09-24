@@ -1,12 +1,5 @@
 <?php
 
-/*
- *  This file is licensed under the MIT License version 3 or
- *  later. See the LICENSE file for details.
- *
- *  Copyright 2017 Michael Joyce <ubermichael@gmail.com>.
- */
-
 namespace OCA\WestVault\Service;
 
 use DOMDocument;
@@ -15,17 +8,13 @@ use GuzzleHttp\Stream\Stream;
 use OCA\WestVault\Util\Namespaces;
 use OCP\IURLGenerator;
 use OCP\IUser;
+use Ramsey\Uuid\Uuid;
 use SimpleXMLElement;
 
-/**
- * Description of swordclient
- *
- * @author Michael Joyce <ubermichael@gmail.com>
- */
 class SwordClient {
 
     /**
-     * @var WestVaultConfig
+     * @var PlnConfig
      */
     private $config;
 
@@ -42,17 +31,16 @@ class SwordClient {
 
     /**
      *
-     * @var IUrlGenerator
+     * @var SimpleXMLElement
      */
-    private $urlGenerator;
+    private $serviceDocument;
 
     /**
      * @param PlnConfig $config
      */
-    public function __construct(WestVaultConfig $config, IURLGenerator $urlGenrator) {
+    public function __construct(WestVaultConfig $config) {
         $this->config = $config;
         $this->ns = new Namespaces();
-        $this->urlGenerator = $urlGenrator;
     }
 
     public function setClient(Client $client) {
@@ -72,53 +60,55 @@ class SwordClient {
     protected function fetchServiceDocument(IUser $user) {
         $sdIri = $this->config->getSystemValue('pln_site_url');
         if (!$sdIri) {
-            return;
+            throw new Exception("Cannot find PLN Service Document URL");
         }
         $uuid = $this->config->getUserValue('pln_user_uuid', $user->getUID());
+        if( ! $uuid) {
+            $uuid = Uuid::NIL;
+        }
         $client = $this->getClient();
         $headers = array(
             'On-Behalf-Of' => $uuid,
-            'User Name' => $user->getDisplayName(),
+            'Provider-Name' => $user->getUID(),
         );
 
         $response = $client->get($sdIri, ['headers' => $headers]);
-        $xml = $response->xml();
+        $xml = simplexml_load_string($response->getBody());
+        if($xml === false) {
+            throw new \Exception("Cannot parse service document: " . implode("\n", libxml_get_errors()));
+        }
         $this->ns->registerNamespaces($xml);
-        return $xml;
+        $this->serviceDocument = $xml;
     }
 
     public function getServiceDocument(IUser $user) {
-        $xml = $this->fetchServiceDocument($user);
-        return $xml->serviceDocument;
+        if (!$this->serviceDocument) {
+            $this->fetchServiceDocument($user);
+        }
+        return $this->serviceDocument;
     }
     
-    public function isAccepting(IUser $user) {
-        $serviceDocument = $this->getServiceDocument($user);
-        if( ! $serviceDocument) {
-            return false;
-        }
-        return $serviceDocument->path('//pkp:pln_accepting/@is_accepting')[0] == "Yes";
+    public function getTermsUpdated(IUser $user) {
+        $this->getServiceDocument($user);
+        return (string)$this->serviceDocument->xpath('//pkp:terms_of_use/@updated')[0];    
     }
 
     public function getTermsOfUse(IUser $user) {
-        $serviceDocument = $this->getServiceDocument($user);
-        if( ! $serviceDocument) {
-            return;
-        }
-        $serviceDocument->xpath('//pkp:terms_of_use/pkp:*');
+        $this->getServiceDocument($user);
+        $termsXml = $this->serviceDocument->xpath('//pkp:terms_of_use/pkp:*');
         $terms = array();
-        foreach($termsXml as $xml) {
+        foreach ($termsXml as $xml) {
             $terms[] = array(
                 'text' => "{$xml}",
                 'id' => $xml->getName(),
-                'updated' => (string)$xml['updated'],
+                'updated' => (string) $xml['updated'],
             );
         }
         return $terms;
     }
 
-    public function getColIri(IUser $user) {
-        $this->requireServiceDocument($user);
+    public function getColIri() {
+        $this->getServiceDocument();
         if (!$this->serviceDocument) {
             return null;
         }

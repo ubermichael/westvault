@@ -1,16 +1,28 @@
 <h2>WestVault Settings</h2>
 
 <h3>Terms of Service</h3>
-<form>
-    <p>
-        <?php if ($_['pln_site_terms_checked']): ?>
-            The terms of service were last updated <?php p($_['pln_site_terms_checked']->format('c')); ?>.
-        <?php else: ?>
-            The terms of service have not been updated.
-        <?php endif ?>
-        <br>
-        <button id="pln_terms_refresh">Refresh</button>
-    </p>
+<form id="westvault_terms">
+    <?php if ($_['pln_user_terms_checked']): ?>
+        <ol>
+            <?php foreach ($_['pln_user_terms'] as $term): ?>
+                <li><?php p($term['text']); ?><br>
+                    <em>updated <?php p($term['updated']); ?></em>
+                </li>
+            <?php endforeach; ?>
+        </ol>
+        <p>
+            <?php if ($_['pln_user_agreed']): ?>
+                Agreement date: <?php p($_['pln_user_agreed']->format('c')); ?>
+            <?php else: ?>
+                <label for="pln_user_agreed">I agree to abide by the terms of use.</label>
+                <input type="checkbox" name="pln_user_agreed" id="pln_user_agreed" value="agree"/><br>
+                <button id="terms_agree">Save Agreement</button>
+            <?php endif; ?>
+        </p>
+    <?php else: ?>
+        <p>The terms of service have not been updated.</p>
+    <?php endif ?>
+    <button id="pln_terms_refresh">Refresh Terms</button>
 </form>
 
 <h3>Global Settings</h3>
@@ -66,15 +78,6 @@
             <?php echo $_['pln_site_url'] ?>
         </blockquote>
 
-        <h4>Terms of Service</h4>
-        <p>
-            <?php if ($_['pln_site_terms_checked']): ?>
-                The terms of service were last updated <?php p($_['pln_site_terms_checked']->format('c')); ?>.
-            <?php else: ?>
-                The terms of service have never been updated.
-            <?php endif ?>
-        </p>
-
     </div>
 <?php endif ?>
 
@@ -106,37 +109,18 @@
         <input <?php if ($_['pln_user_cleanup'] === 'cleanup') echo 'checked="checked"' ?> type="checkbox" name="pln_user_cleanup" id="pln_user_cleanup" value="cleanup"/><br>
         <em>Remove files once they've been deposited to LOCKSS. Leave this unchecked if you would like to clean up the folder manually.</em>
     </p>
-
-    <h3>Terms of use.</h3>
-    <p>You must agree to the followig terms of use to preserve contnt in the COPPUL PLN:</p>
-    <ol>
-        <?php foreach ($_['pln_site_terms'] as $term): ?>
-            <li><?php p($term['text']); ?><br>
-                <em>updated <?php p($term['updated']); ?></em>
-            </li>
-        <?php endforeach; ?>
-    </ol>
-    <p>
-        <?php if ($_['pln_user_agreed']): ?>
-            Agreement date: <?php p($_['pln_user_agreed']->format('c')); ?>
-        <?php else: ?>
-            <label for="pln_user_agreed">I agree to abide by the terms of use.</label>
-            <input type="checkbox" name="pln_user_agreed" id="pln_user_agreed" value="agree"/><br>
-        <?php endif; ?>
-    </p>
-    <h4>User UUID</h4>
-    <p>
-        The PLN uses this string to associate deposits with your account.
-    </p>
-    <blockquote>
-        <?php if ($_['pln_user_uuid']): ?>
-            <?php echo $_['pln_user_uuid']; ?>
-        <?php else: ?>
-            <i>You do not have a UUID. All users other than OwnCloud admininstrators should have a UUID.</i>
-        <?php endif ?>
-    </blockquote>
-    <p>
-        <button id="user_save">Save</button>
-    </p>
-
+    <button id="user_save">Save Settings</button>
 </form>
+
+
+<h4>User UUID</h4>
+<p>
+    The PLN uses this string to associate deposits with your account.
+</p>
+<blockquote>
+    <?php if ($_['pln_user_uuid']): ?>
+        <?php echo $_['pln_user_uuid']; ?>
+    <?php else: ?>
+        <i>You do not have a UUID. All users other than OwnCloud admininstrators should have a UUID.</i>
+    <?php endif ?>
+</blockquote>

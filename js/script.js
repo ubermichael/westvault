@@ -39,12 +39,22 @@
             var formData = $("#westvault_site").serialize();
             postConfig(url, formData);
         });
+        $("#terms_agree").click(function(e){
+            e.preventDefault();
+            var url = OC.generateUrl('/apps/westvault/config/save-agreement');
+            var formData = $("#westvault_terms").serialize();
+            postConfig(url, formData);
+        });
         
         $("#pln_terms_refresh").click(function(e){
             e.preventDefault();
             var url = OC.generateUrl('/apps/westvault/config/refresh');
+            console.log("starting terms refresh.");
             $.ajax(url, {
                 method: 'POST',
+                complete: function(){
+                    console.log("finished terms refresh.");
+                },
                 success: function (responseData, status, jqXhr) {
                     alert(responseData.result);
                     console.log(responseData);
