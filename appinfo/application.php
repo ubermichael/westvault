@@ -84,7 +84,8 @@ class Application extends App {
                     $c->query('GroupManager'),
                     $c->query('WestVaultConfig'),
                     $c->query('WestVaultNavigation'),
-                    $c->query('SwordClient')
+                    $c->query('SwordClient'),
+                    $c->query('ServerContainer')->getRootFolder()
             );
         });
 

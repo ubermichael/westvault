@@ -40,24 +40,24 @@ class UserHooks {
     /**
      * @var Root
      */
-    private $rootFolder;
+    private $root;
 
     /**
      * @var DepositFileMapper
      */
     private $mapper;
 
-    public function __construct(IUserManager $manager, WestVaultConfig $config, Root $rootFolder, DepositFileMapper $mapper) {
+    public function __construct(IUserManager $manager, WestVaultConfig $config, Root $root, DepositFileMapper $mapper) {
         $this->manager = $manager;
         $this->config = $config;
-        $this->rootFolder = $rootFolder;
+        $this->root = $root;
         $this->mapper = $mapper;
     }
 
     public function register() {
         $this->manager->listen('\OC\User', 'postCreateUser', [$this, 'userRegister']);
-        $this->rootFolder->listen('\OC\Files', 'postCreate', [$this, 'postCreate']);
-        $this->rootFolder->listen('\OC\Files', 'postDelete', [$this, 'postDelete']);
+        $this->root->listen('\OC\Files', 'postCreate', [$this, 'postCreate']);
+        $this->root->listen('\OC\Files', 'postDelete', [$this, 'postDelete']);
     }
 
     public function userRegister(IUser $user) {
@@ -71,7 +71,7 @@ class UserHooks {
         
         $uid = $file->getOwner()->getUID();
         $watchFolder = $this->config->getUserValue('pln_user_preserved_folder', $uid);        
-        $userPath = $this->rootFolder->getUserFolder($uid)->getPath();
+        $userPath = $this->root->getUserFolder($uid)->getPath();
         $localPath = substr($file->getPath(), strlen($userPath)+1);
         if(strncmp($localPath, $watchFolder, strlen($watchFolder) !== 0)) {
             return;

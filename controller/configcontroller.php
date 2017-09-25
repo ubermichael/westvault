@@ -11,12 +11,14 @@ namespace OCA\WestVault\Controller;
 
 use DateTime;
 use Exception;
+use OC\Files\Node\Root;
 use OCA\WestVault\Service\Navigation;
 use OCA\WestVault\Service\SwordClient;
 use OCA\WestVault\Service\WestVaultConfig;
 use OCP\AppFramework\Controller;
 use OCP\AppFramework\Http\DataResponse;
 use OCP\AppFramework\Http\TemplateResponse;
+use OCP\Files\NotFoundException;
 use OCP\IGroupManager;
 use OCP\IRequest;
 use OCP\IUser;
@@ -47,14 +49,20 @@ class ConfigController extends Controller {
      * @var SwordClient
      */
     private $client;
+    
+    /**
+     * @var Root
+     */
+    private $root;
 
-    public function __construct($appName, IRequest $request, IUser $user, IGroupManager $groupManager, WestVaultConfig $config, Navigation $navigation, SwordClient $client) {
+    public function __construct($appName, IRequest $request, IUser $user, IGroupManager $groupManager, WestVaultConfig $config, Navigation $navigation, SwordClient $client, Root $root) {
         parent::__construct($appName, $request);
         $this->user = $user;
         $this->groupManager = $groupManager;
         $this->config = $config;
         $this->navigation = $navigation;
         $this->client = $client;
+        $this->root = $root;
     }
 
     /**
@@ -150,6 +158,20 @@ class ConfigController extends Controller {
         }
     }
 
+	/**
+	 * Check that a user folder exists.
+	 * 
+	 * @param string $name
+	 */
+	protected function checkUserFolder($name) {
+		$userFolder = $this->root->getUserFolder($this->user->getUID());
+		try {
+			$userFolder->get($name);
+		} catch (NotFoundException $e) {
+			$userFolder->newFolder($name);
+		}
+	}
+
     /**
      * @NoAdminRequired
      */
@@ -160,6 +182,9 @@ class ConfigController extends Controller {
             $this->config->setUserValue('pln_user_preserved_folder', $this->user->getUID(), $this->request->getParam('pln_user_preserved_folder'));
             $this->config->setUserValue('pln_user_restored_folder', $this->user->getUID(), $this->request->getParam('pln_user_restored_folder'));
             $this->config->setUserValue('pln_user_cleanup', $this->user->getUID(), serialize('agreed' === $this->request->getParam('pln_user_cleanup')));
+            $this->checkUserFolder($this->config->getUserValue('pln_user_preserved_folder', $this->user->getUID()));
+            $this->checkUserFolder($this->config->getUserValue('pln_user_restored_folder', $this->user->getUID()));
+
             return new DataResponse([
                 'message' => 'The settings have been saved.'
             ]);
