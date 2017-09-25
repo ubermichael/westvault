@@ -17,26 +17,67 @@ use OCP\AppFramework\Db\Entity;
  */
 class DepositFile extends Entity {
     
+    /**
+     * @var int
+     */
     protected $fileId;
     
+    /**
+     * @var string
+     */
     protected $userId;
     
+    /**
+     * @var string
+     */
     protected $uuid;
     
+    /**
+     * @var string
+     */
     protected $path;
     
+    /**
+     * @var string
+     */
     protected $checksumType;
     
+    /**
+     * @var string
+     */
     protected $checksumValue;
     
+    /**
+     * @var string
+     */
     protected $plnStatus;
     
+    /**
+     * @var string
+     */
     protected $lockssStatus;
     
+    /**
+     * @var float
+     */
     protected $agreement;
     
+    /**
+     * @var int
+     */
     protected $dateSent;
     
+    /**
+     * @var int
+     */
     protected $dateChecked;
+    
+    /**
+     * Build a DepositFile. Does some very simple type hinting.
+     */
+    public function __construct() {
+        $this->addType('fileId', 'int');
+        $this->addType('agreement', 'float');
+    }
     
 }

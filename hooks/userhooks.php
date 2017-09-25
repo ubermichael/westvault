@@ -21,7 +21,7 @@ use OCP\IUserManager;
 use Ramsey\Uuid\Uuid;
 
 /**
- * Description of userhooks
+ * Collection of hooks for the plugin.
  *
  * @author Michael Joyce <ubermichael@gmail.com>
  */
@@ -47,6 +47,14 @@ class UserHooks {
      */
     private $mapper;
 
+    /**
+     * Build an object with the user hooks.
+     * 
+     * @param IUserManager $manager
+     * @param WestVaultConfig $config
+     * @param Root $root
+     * @param DepositFileMapper $mapper
+     */
     public function __construct(IUserManager $manager, WestVaultConfig $config, Root $root, DepositFileMapper $mapper) {
         $this->manager = $manager;
         $this->config = $config;
@@ -54,16 +62,30 @@ class UserHooks {
         $this->mapper = $mapper;
     }
 
+    /**
+     * Register all the hooks for the plugin.
+     */
     public function register() {
         $this->manager->listen('\OC\User', 'postCreateUser', [$this, 'userRegister']);
         $this->root->listen('\OC\Files', 'postCreate', [$this, 'postCreate']);
         $this->root->listen('\OC\Files', 'postDelete', [$this, 'postDelete']);
     }
 
+    /**
+     * Callback for the user register hook.
+     * 
+     * @param IUser $user
+     */
     public function userRegister(IUser $user) {
         $this->config->setUserValue('pln_user_uuid', $user->getUID(), Uuid::uuid4()->toString());
     }
 
+    /**
+     * Callback for the post file create hook.
+     * 
+     * @param Node $file
+     * @return null
+     */
     public function postCreate(Node $file) {
         if ($file->getType() !== FileInfo::TYPE_FILE) {
             return;
@@ -89,6 +111,12 @@ class UserHooks {
         $this->mapper->insert($depositFile);
     }
     
+    /**
+     * Callback for after a file is deleted.
+     * 
+     * @param File $file
+     * @return null;
+     */
     public function postDelete(File $file) {
         if ($file->getType() !== FileInfo::TYPE_FILE) {
             return;

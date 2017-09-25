@@ -11,6 +11,9 @@ namespace OCA\WestVault\Service;
 
 use OCP\IConfig;
 
+/**
+ * Configuration manager for the plugin.
+ */
 class WestVaultConfig {
     
     /**
@@ -23,6 +26,12 @@ class WestVaultConfig {
      */
     private $appName;
     
+    /**
+     * Build the config manager.
+     * 
+     * @param IConfig $config
+     * @param type $appName
+     */
     public function __construct(IConfig $config, $appName) {
         $this->config = $config;
         $this->appName = $appName;

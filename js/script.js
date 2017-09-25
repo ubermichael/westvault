@@ -10,17 +10,22 @@
 
 (function ($, OC) {
 
+    /**
+     * Post a configuration form to the config controller.
+     * 
+     * @param string url
+     * @param array formData
+     * @returns null
+     */
     function postConfig(url, formData) {
         $.ajax(url, {
             method: 'POST',
             data: formData,
             success: function (responseData, status, jqXhr) {
                 alert(responseData.message);
-                console.log(responseData.message);
             },
             error: function (jqXhr, status, error) {
-                alert("Status: " + status + " " + error);
-                console.log('error', [error, status, jqXhr]);
+                alert("Error: " + status + " " + error);
             }
         });
     }

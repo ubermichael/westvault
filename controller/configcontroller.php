@@ -23,6 +23,10 @@ use OCP\IGroupManager;
 use OCP\IRequest;
 use OCP\IUser;
 
+/**
+ * The Config Controller handles all teh configuration related functionality
+ * and refreshing the terms of use.
+ */
 class ConfigController extends Controller {
 
     /**
@@ -55,6 +59,18 @@ class ConfigController extends Controller {
      */
     private $root;
 
+    /**
+     * Build the controller.
+     * 
+     * @param string $appName
+     * @param IRequest $request
+     * @param IUser $user
+     * @param IGroupManager $groupManager
+     * @param WestVaultConfig $config
+     * @param Navigation $navigation
+     * @param SwordClient $client
+     * @param Root $root
+     */
     public function __construct($appName, IRequest $request, IUser $user, IGroupManager $groupManager, WestVaultConfig $config, Navigation $navigation, SwordClient $client, Root $root) {
         parent::__construct($appName, $request);
         $this->user = $user;
@@ -66,8 +82,12 @@ class ConfigController extends Controller {
     }
 
     /**
+     * Show the configuration forms.
+     * 
      * @NoAdminRequired
      * @NoCSRFRequired
+     * 
+     * @return TemplateResponse
      */
     public function index() {
         $params = [
@@ -91,7 +111,11 @@ class ConfigController extends Controller {
     }
 
     /**
+     * Refresh the terms of use.
+     * 
      * @NoAdminRequired
+     * 
+     * @return DataResponse
      */
     public function refresh() {
         if (!$this->client) {
@@ -104,42 +128,51 @@ class ConfigController extends Controller {
             $newTerms = $this->client->getTermsOfUse($this->user);
             $updated = $this->client->getTermsUpdated($this->user);
             $result = 'The terms of service have not changed since the last time they were checked.';
-//            if($updated !== $this->config->getUserValue('pln_terms_of_use_updated', $this->user->getUID(), '')) {
-            $result = 'The terms of service have been updated.';
-            $this->config->setUserValue('pln_terms_of_use', $this->user->getUID(), serialize($newTerms));
-            $this->config->setUserValue('pln_terms_of_use_updated', $this->user->getUID(), $updated);
-//            }
-            return new DataResponse(array(
-                'status' => 'success',
-                'result' => $result,
-                'terms' => $newTerms,
-                'updated' => $updated,
-            ));
+            if($updated !== $this->config->getUserValue('pln_terms_of_use_updated', $this->user->getUID(), '')) {
+                $result = 'The terms of service have been updated.';
+                $this->config->setUserValue('pln_terms_of_use', $this->user->getUID(), serialize($newTerms));
+                $this->config->setUserValue('pln_terms_of_use_updated', $this->user->getUID(), $updated);
+            }
         } catch (Exception $ex) {
             return new DataResponse(array(
                 'status' => 'failure',
                 'result' => 'Error refreshing the terms of use: ' . $ex->getMessage() . ' at ' . $ex->getFile() . '#' . $ex->getLine(),
             ));
         }
+        return new DataResponse(array(
+            'status' => 'success',
+            'result' => $result,
+            'terms' => $newTerms,
+            'updated' => $updated,
+        ));
     }
 
+    /**
+     * Save site configuration settings.
+     * 
+     * @return DataResponse
+     */
     public function saveSite() {
         try {
             $this->config->setAppValue('pln_site_ignore', $this->request->getParam('pln_site_ignore'));
             $this->config->setSystemValue('pln_site_checksum_type', $this->request->getParam('pln_site_checksum_type'));
             $this->config->setSystemValue('pln_site_url', $this->request->getParam('pln_site_url'));
-            return new DataResponse([
-                'message' => 'The settings have been saved.'
-            ]);
         } catch (Exception $e) {
             return new DataResponse([
                 'message' => "Error saving settings. Some settings may not have been saved. \n" . $e->getMessage(),
             ]);
         }
+        return new DataResponse([
+            'message' => 'The settings have been saved.'
+        ]);
     }
 
     /**
+     * Save the user terms of use agreement.
+     * 
      * @NoAdminRequired
+     * 
+     * @return DataResponse
      */
     public function saveAgreement() {
         try {
@@ -159,7 +192,7 @@ class ConfigController extends Controller {
     }
 
 	/**
-	 * Check that a user folder exists.
+	 * Check that a user folder exists and create it if necessary.
 	 * 
 	 * @param string $name
 	 */
@@ -173,7 +206,12 @@ class ConfigController extends Controller {
 	}
 
     /**
+     * Save the user settings and create the preservation and restoration 
+     * folders if necessary.
+     * 
      * @NoAdminRequired
+     * 
+     * @return DataResponse
      */
     public function saveUser() {
         try {

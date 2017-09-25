@@ -3,14 +3,19 @@
 namespace OCA\WestVault\Service;
 
 use DOMDocument;
+use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Stream\Stream;
 use OCA\WestVault\Util\Namespaces;
-use OCP\IURLGenerator;
 use OCP\IUser;
 use Ramsey\Uuid\Uuid;
 use SimpleXMLElement;
 
+/**
+ * Sword Client to interact with the staging server with the SWORD protocol.
+ * 
+ * Don't use the sword protocol.
+ */
 class SwordClient {
 
     /**
@@ -36,6 +41,8 @@ class SwordClient {
     private $serviceDocument;
 
     /**
+     * Build the client.
+     * 
      * @param PlnConfig $config
      */
     public function __construct(WestVaultConfig $config) {
@@ -43,11 +50,18 @@ class SwordClient {
         $this->ns = new Namespaces();
     }
 
+    /**
+     * Set the HTTP client. Useful for testing, useless otherwise.
+     * 
+     * @param Client $client
+     */
     public function setClient(Client $client) {
         $this->httpClient = $client;
     }
 
     /**
+     * Get (or create) an HTTP client.
+     * 
      * @return Client
      */
     public function getClient() {
@@ -57,6 +71,12 @@ class SwordClient {
         return $this->httpClient;
     }
 
+    /**
+     * Fetch the service document from the staging server.
+     * 
+     * @param IUser $user
+     * @throws Exception if the server returns something that isn't XML.
+     */
     protected function fetchServiceDocument(IUser $user) {
         $sdIri = $this->config->getSystemValue('pln_site_url');
         if (!$sdIri) {
@@ -75,12 +95,18 @@ class SwordClient {
         $response = $client->get($sdIri, ['headers' => $headers]);
         $xml = simplexml_load_string($response->getBody());
         if($xml === false) {
-            throw new \Exception("Cannot parse service document: " . implode("\n", libxml_get_errors()));
+            throw new Exception("Cannot parse service document: " . implode("\n", libxml_get_errors()));
         }
         $this->ns->registerNamespaces($xml);
         $this->serviceDocument = $xml;
     }
 
+    /**
+     * Gets the service document and caches it for reuse.
+     * 
+     * @param IUser $user
+     * @return SimpleXMLElement
+     */
     public function getServiceDocument(IUser $user) {
         if (!$this->serviceDocument) {
             $this->fetchServiceDocument($user);
@@ -88,11 +114,23 @@ class SwordClient {
         return $this->serviceDocument;
     }
     
+    /**
+     * Find when the term of use were most recently updated.
+     * 
+     * @param IUser $user
+     * @return string
+     */
     public function getTermsUpdated(IUser $user) {
         $this->getServiceDocument($user);
         return (string)$this->serviceDocument->xpath('//pkp:terms_of_use/@updated')[0];    
     }
 
+    /**
+     * Get the terms of use.
+     * 
+     * @param IUser $user
+     * @return array
+     */
     public function getTermsOfUse(IUser $user) {
         $this->getServiceDocument($user);
         $termsXml = $this->serviceDocument->xpath('//pkp:terms_of_use/pkp:*');
@@ -107,16 +145,22 @@ class SwordClient {
         return $terms;
     }
 
+    /**
+     * Get the SWORD collection URI from the service document.
+     * 
+     * @return string
+     */
     public function getColIri() {
         $this->getServiceDocument();
         if (!$this->serviceDocument) {
             return null;
         }
         $href = $this->serviceDocument->xpath('//app:collection/@href');
-        return (string) $href[0];
+        return (string)$href[0];
     }
 
     /**
+     * Create a deposit in the staging server.
      * 
      * @param DOMDocument $atom
      * @return SimpleXMLElement

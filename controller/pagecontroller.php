@@ -19,6 +19,10 @@ use OCP\AppFramework\Http\TemplateResponse;
 use OCP\IRequest;
 use OCP\IUser;
 
+/**
+ * All the non-configuration pages and routes correspond to the 
+ * page controller.
+ */
 class PageController extends Controller {
 
     /**
@@ -31,6 +35,15 @@ class PageController extends Controller {
      */
     private $navigation;
 
+    /**
+     * Build the controller.
+     * 
+     * @param type $AppName
+     * @param IRequest $request
+     * @param IUser $user
+     * @param Navigation $navigation
+     * @param DepositFileMapper $mapper
+     */
     public function __construct($AppName, IRequest $request, IUser $user, Navigation $navigation, DepositFileMapper $mapper) {        
         parent::__construct($AppName, $request);
         $this->user = $user;
@@ -39,6 +52,8 @@ class PageController extends Controller {
     }
 
     /**
+     * The index page shows a list of deposits and their status.
+     * 
      * @NoAdminRequired
      * @NoCSRFRequired
      */

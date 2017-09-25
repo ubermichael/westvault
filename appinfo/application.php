@@ -19,8 +19,18 @@ use OCA\WestVault\Service\WestVaultConfig;
 use OCP\AppFramework\App;
 use OCP\IContainer;
 
+/**
+ * Application is the central entry point for the plugin. It defines all the 
+ * container elements.
+ */
 class Application extends App {
 
+    /**
+     * Build the application and populate the container services.
+     * 
+     * @param string $appName
+     * @param array $urlParams
+     */
     public function __construct($appName = 'westvault', array $urlParams = array()) {
         parent::__construct($appName, $urlParams);
 
