@@ -39,36 +39,37 @@ class Application extends App {
          */
         $container = $this->getContainer();
 
-        $container->registerService('Config', function($c) {
-            return $c->query('ServerContainer')->getConfig();
-        });
-
         // User Session gets information about the logged in user. It must be
         // registered so that the User service can use it.
         $container->registerService('UserSession', function($c) {
             return $c->query('ServerContainer')->getUserSession();
         });
 
-        // currently logged in user, userId can be gotten by calling the
+        // currently logged in user, userId can be gotten by calling this
+        // service from the container.
         $container->registerService('User', function($c) {
             return $c->query('UserSession')->getUser();
         });
 
+        // Group Manager makes sure files are only moved within a group.
         $container->registerService('GroupManager', function(IContainer $c) {
             return $c->query('ServerContainer')->getGroupManager();
         });
 
+        // Config manager for the plugin.
         $container->registerService('WestVaultConfig', function($c) {
             return new WestVaultConfig(
-                    $c->query('Config'),
+                    $c->query('ServerContainer')->getConfig(),
                     $c->query('AppName')
             );
         });
         
+        // Navigation manager.
         $container->registerService('WestVaultNavigation', function($c){
             return new Navigation($c->query('OCP\IURLGenerator'));
         });
 
+        // Page controller for non-config stuff.
         $container->registerService('PageController', function($c) {
             return new PageController(
                     $c->query('AppName'), 
@@ -79,13 +80,7 @@ class Application extends App {
             );
         });
         
-        $container->registerService('SwordClient', function($c){
-            return new SwordClient(
-                $c->query('WestVaultConfig'),
-                $c->query('OCP\IURLGenerator')
-            );
-        });
-        
+        // Manage plugin configuration.
         $container->registerService('ConfigController', function($c) {
             return new ConfigController(
                     $c->query('AppName'), 
@@ -99,10 +94,21 @@ class Application extends App {
             );
         });
 
-         $container->registerService('DepositFileMapper', function($c){
+        // Sword Client interacts with the staging server.
+        $container->registerService('SwordClient', function($c){
+            return new SwordClient(
+                $c->query('WestVaultConfig'),
+                $c->query('OCP\IURLGenerator')
+            );
+        });
+        
+        // Map deposit files from the database.
+        $container->registerService('DepositFileMapper', function($c){
             return new DepositFileMapper($c->query('ServerContainer')->getDb());
         });
         
+        // Hooks and events management. 
+        // @todo UserHooks should be called HooksManager or something.
         $container->registerService('UserHooks', function($c) {
             return new UserHooks(
                     $c->query('ServerContainer')->getUserManager(),
