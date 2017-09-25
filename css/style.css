@@ -8,3 +8,30 @@ blockquote {
 div#app-content {
     padding-left: 1em;
 }
+
+#deposits {
+    position: relative;
+    width: 100%;
+}
+
+#deposits th {
+    font-weight: bold;
+}
+
+#deposits tr {
+    background-color: white;
+    height: 40px;
+}
+
+#deposits td {
+    border-bottom: 1px solid lightgrey;
+}
+
+#deposits .path {
+    width: 100%;
+}
+
+#deposits .status {
+    min-width: 160px;
+    max-width: 160px;
+}

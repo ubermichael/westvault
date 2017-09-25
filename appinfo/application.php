@@ -11,6 +11,7 @@ namespace OCA\WestVault\AppInfo;
 
 use OCA\WestVault\Controller\ConfigController;
 use OCA\WestVault\Controller\PageController;
+use OCA\WestVault\Db\DepositFileMapper;
 use OCA\WestVault\Hooks\UserHooks;
 use OCA\WestVault\Service\Navigation;
 use OCA\WestVault\Service\SwordClient;
@@ -63,7 +64,8 @@ class Application extends App {
                     $c->query('AppName'), 
                     $c->query('Request'), 
                     $c->query('User'), 
-                    $c->query('WestVaultNavigation')
+                    $c->query('WestVaultNavigation'),
+                    $c->query('DepositFileMapper')
             );
         });
         
@@ -85,11 +87,17 @@ class Application extends App {
                     $c->query('SwordClient')
             );
         });
+
+         $container->registerService('DepositFileMapper', function($c){
+            return new DepositFileMapper($c->query('ServerContainer')->getDb());
+        });
         
         $container->registerService('UserHooks', function($c) {
             return new UserHooks(
                     $c->query('ServerContainer')->getUserManager(),
-                    $c->query('WestVaultConfig')
+                    $c->query('WestVaultConfig'),        
+                    $c->query('ServerContainer')->getRootFolder(),
+                    $c->query('DepositFileMapper')
             );
         });
     }
