@@ -13,6 +13,7 @@ use OCA\WestVault\Controller\ConfigController;
 use OCA\WestVault\Controller\PageController;
 use OCA\WestVault\Db\DepositFileMapper;
 use OCA\WestVault\Hooks\UserHooks;
+use OCA\WestVault\Service\DepositorService;
 use OCA\WestVault\Service\Navigation;
 use OCA\WestVault\Service\SwordClient;
 use OCA\WestVault\Service\WestVaultConfig;
@@ -113,6 +114,15 @@ class Application extends App {
             return new UserHooks(
                     $c->query('ServerContainer')->getUserManager(),
                     $c->query('WestVaultConfig'),        
+                    $c->query('ServerContainer')->getRootFolder(),
+                    $c->query('DepositFileMapper')
+            );
+        });
+        
+        $container->registerService('DepositorService', function($c){
+            return new DepositorService(
+                    $c->query('WestVaultConfig'),
+                    $c->query('SwordClient'),
                     $c->query('ServerContainer')->getRootFolder(),
                     $c->query('DepositFileMapper')
             );

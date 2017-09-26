@@ -101,6 +101,7 @@ class DepositFileMapper extends Mapper {
      * @return DepositFile[]
      */
     public function findNotDeposited() {
-        throw new Exception("Not implemented yet.");
+        $sql = "SELECT * FROM " . self::TBL . " WHERE `date_sent` IS NULL ORDER BY `id`";
+        return $this->findEntities($sql);        
     }
 }
