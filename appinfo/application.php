@@ -124,7 +124,9 @@ class Application extends App {
                     $c->query('WestVaultConfig'),
                     $c->query('SwordClient'),
                     $c->query('ServerContainer')->getRootFolder(),
-                    $c->query('DepositFileMapper')
+                    $c->query('DepositFileMapper'),
+                    $c->query('OCP\IURLGenerator'),
+                    $c->query('ServerContainer')->getUserManager()
             );
         });
     }

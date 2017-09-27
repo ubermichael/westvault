@@ -17,7 +17,9 @@ use OCA\WestVault\Db\DepositFile;
 use OCA\WestVault\Db\DepositFileMapper;
 use OCA\WestVault\Service\SwordClient;
 use OCA\WestVault\Service\WestVaultConfig;
-use Ramsey\Uuid\Uuid;
+use OCA\WestVault\Util\Namespaces;
+use OCP\IURLGenerator;
+use OCP\IUserManager;
 
 /**
  * Description of depositorservice
@@ -25,28 +27,34 @@ use Ramsey\Uuid\Uuid;
  * @author Michael Joyce <ubermichael@gmail.com>
  */
 class DepositorService {
-    
+
     private $config;
     private $client;
     private $root;
     private $mapper;
-    
-    public function __construct(WestVaultConfig $config, SwordClient $client, Root $root, DepositFileMapper $mapper ) {
+    private $generator;
+    private $manager;
+
+    public function __construct(WestVaultConfig $config, SwordClient $client, Root $root, DepositFileMapper $mapper, IURLGenerator $generator, IUserManager $manager) {
         $this->config = $config;
         $this->client = $client;
         $this->root = $root;
         $this->mapper = $mapper;
+        $this->generator = $generator;
+        $this->manager = $manager;
     }
 
     public function run() {
-        $entities = $this->mapper->findNotDeposited();
-        if(count($entities) === 0) {
+        $files = $this->mapper->findNotDeposited();
+        if (count($files) === 0) {
             return;
         }
-        foreach($entities as $entity) {
-            print $entity->getPath() . "\n";
-          try {
-                $this->processFile($entity);
+        foreach ($files as $file) {
+            $user = $this->manager->get($file->getUserId());
+            try {
+                $atom = $this->generateDepositXml($user, $file);
+                $responseXml = $this->client->createDeposit($user, $atom);
+                print $responseXml->asXML();
             } catch (ServerException $ex) {
                 print $ex->getMessage() . "\n";
                 print $ex->getResponse()->getBody() . "\n";
@@ -55,26 +63,31 @@ class DepositorService {
             }
         }
     }
-    
-    protected function generateDepositXml(DepositFile $depositFile) {
+
+    /**
+     * @param DepositFile $depositFile
+     * @return DOMDocument
+     */
+    protected function generateDepositXml(IUser $user, DepositFile $depositFile) {
+        $ns = new Namespaces();
         $atom = new DOMDocument('1.0', 'utf-8');
         $entry = $atom->createElementNS('http://www.w3.org/2005/Atom', 'entry');
         $atom->appendChild($entry);
-        $entry->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:pkp', $this->ns->getNamespace('pkp'));
-        $entry->appendChild($atom->createElement('email', 'example@example.com'));
-        $entry->appendChild($atom->createElement('title', 'Deposit title'));
+        $entry->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:pkp', $ns->getNamespace('pkp'));
+        $entry->appendChild($atom->createElement('email', $user->getEMailAddress()));
+        $entry->appendChild($atom->createElement('title', $depositFile->filename()));
         $entry->appendChild($atom->createElement('id', 'urn:uuid:' . $depositFile->getUuid()));
         $entry->appendChild($atom->createElement('updated', strftime("%FT%TZ")));
         try {
             // $this->storage->getById() doesn't work here. no idea why.
-            $file = $this->storage->get($depositFile->getPath());
+            $file = $this->root->get($depositFile->getPath());
         } catch (Exception $e) {
             die($e->getMessage());
         }
         $content = $atom->createElementNS(
-            $this->ns->getNamespace('pkp'), 'pkp:content', $this->urlGenerator->linkToRouteAbsolute('coppulpln.pln.fetch', array(
-                'depositUuid' => $depositFile->getUuid()
-            ))
+                $ns->getNamespace('pkp'), 'pkp:content', $this->generator->linkToRouteAbsolute('westvault.page.fetch', array(
+                    'uuid' => $depositFile->getUuid()
+                ))
         );
         $content->setAttribute('size', $file->getSize());
         $content->setAttribute('checksumType', $depositFile->getChecksumType());

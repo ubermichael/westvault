@@ -10,7 +10,6 @@
         }
     ],
     "require": {
-        "guzzlehttp/guzzle": "^6.3",
         "ramsey/uuid": "^3.7"
     }
 }

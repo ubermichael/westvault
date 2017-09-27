@@ -19,8 +19,9 @@
  */
 return [
     'routes' => [
-        ['name' => 'page#index', 'url' => '/', 'verb' => 'GET'],
-        ['name' => 'page#do_echo', 'url' => '/echo', 'verb' => 'POST'],
+        ['name' => 'page#index', 'url' => '/', 'verb' => 'GET'],        
+        ['name' => 'page#fetch', 'url' => '/fetch/{uuid}', 'verb' => 'GET'],
+        
         ['name' => 'config#index', 'url' => '/config', 'verb' => 'GET'],
         ['name' => 'config#saveUser', 'url' => '/config/save-user', 'verb' => 'POST'],
         ['name' => 'config#saveSite', 'url' => '/config/save-site', 'verb' => 'POST'],

@@ -150,8 +150,8 @@ class SwordClient {
      * 
      * @return string
      */
-    public function getColIri() {
-        $this->getServiceDocument();
+    public function getColIri(IUser $user) {
+        $this->getServiceDocument($user);
         if (!$this->serviceDocument) {
             return null;
         }
@@ -165,13 +165,17 @@ class SwordClient {
      * @param DOMDocument $atom
      * @return SimpleXMLElement
      */
-    public function createDeposit(DOMDocument $atom) {
-        $colIri = $this->getColIri();
+    public function createDeposit(IUser $user, DOMDocument $atom) {
+        $colIri = $this->getColIri($user);
         $request = $this->httpClient->createRequest('POST', $colIri);
-        $request->setBody(Stream::factory($atom->saveXML()));
-        $response = $this->httpClient->send($request);
-        $xml = $response->xml();
+        $request->setBody(Stream::factory($atom->saveXML()));        
+        $response = $this->httpClient->send($request, []);
+        $xml = simplexml_load_string($response->getBody());
+        if($xml === false) {
+            throw new Exception("Cannot parse response document: " . implode("\n", libxml_get_errors()));
+        }
         $this->ns->registerNamespaces($xml);
+        
         return $xml;
     }
 

@@ -80,4 +80,11 @@ class DepositFile extends Entity {
         $this->addType('agreement', 'float');
     }
     
+    /**
+     * @return string
+     */
+    public function filename() {
+        return basename($this->path);
+    }
+    
 }
