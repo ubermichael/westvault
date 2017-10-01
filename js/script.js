@@ -57,12 +57,12 @@
             console.log("starting terms refresh.");
             $.ajax(url, {
                 method: 'POST',
-                complete: function(){
-                    console.log("finished terms refresh.");
-                },
-                success: function (responseData, status, jqXhr) {
-                    alert(responseData.result);
-                    console.log(responseData);
+                success: function (responseData, status, jqXhr) {                    
+                    alert("The terms have been updated.");
+                    var $ol = $("#westvault_terms blockquote").html('<ol></ol>');
+                    responseData.terms.forEach(function(term) {
+                        $ol.append("<li>" + term['text'] + "<br><em>updated " + term['updated'] + "</li>");
+                    });
                 },
                 error: function (jqXhr, status, error) {
                     alert("Status: " + status + " " + error);

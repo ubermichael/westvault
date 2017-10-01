@@ -104,11 +104,11 @@ class WestVaultConfig {
                 "\n" .
                 $this->config->getAppValue($this->appName, 'pln_site_ignore', $userId) .
                 "\n";
-        $ignorePatterns = array_filter(explode("\n", $ignoreStrings));
+        $ignorePatterns = explode("\n", $ignoreStrings);
         foreach($ignorePatterns as $pattern) {
-            $regexes[] = str_replace(['.', '*'], ['\\.', '.*'], $pattern);
+            $regexes[] = str_replace(['.', '*'], ['\\.', '.*'], trim($pattern));
         }
-        return $regexes;
+        return array_filter($regexes);
     }
 
     /**
