@@ -91,6 +91,25 @@ class WestVaultConfig {
     public function getUserValue($key, $userId, $default = '') {
         return $this->config->getUserValue($userId, $this->appName, $key, $default);
     }
+    
+    /**
+     * Get the ignored file patterns for a user.
+     * 
+     * @param string $userId
+     */
+    public function getIgnoredPatterns($userId) {
+        $regexes = [];
+        $ignoreStrings = 
+                $this->config->getUserValue($userId, $this->appName, 'pln_user_ignore', '') . 
+                "\n" .
+                $this->config->getAppValue($this->appName, 'pln_site_ignore', $userId) .
+                "\n";
+        $ignorePatterns = array_filter(explode("\n", $ignoreStrings));
+        foreach($ignorePatterns as $pattern) {
+            $regexes[] = str_replace(['.', '*'], ['\\.', '.*'], $pattern);
+        }
+        return $regexes;
+    }
 
     /**
      * Set a user value.

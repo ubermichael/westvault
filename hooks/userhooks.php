@@ -96,23 +96,24 @@ class UserHooks {
     public function postCreate(Node $file) {
         $this->logger->warning("pc: {$file->getId()}:{$file->getPath()}");
         if ($file->getType() !== FileInfo::TYPE_FILE) {
-            $this->logger->warning("pc: not a file.");
             return;
         }
         $uid = $file->getOwner()->getUID();
         if( ! $this->config->getUserValue('pln_user_agreed', $uid, null)) {
-            $this->logger->warning("pc: no user agreement.");
             return;
         }
         if( ! $this->config->getUserValue('pln_user_preserved_folder', $uid, null)) {
-            $this->logger->warning("pc: no user preserved folder in config..");
             return;
+        }
+        foreach($this->config->getIgnoredPatterns($uid) as $pattern) {
+            if(preg_match("/^{$pattern}$/", $file->getName())) {
+                return;
+            }
         }
         $watchFolder = $this->config->getUserValue('pln_user_preserved_folder', $uid);        
         $userPath = $this->root->getUserFolder($uid)->getPath();
         $localPath = substr($file->getPath(), strlen($userPath)+1);
         if(strncmp($localPath, $watchFolder, strlen($watchFolder) !== 0)) {
-            $this->logger->warning("pc: file not in user preserved folder.");
             return;
         }
         $checksumType = $this->config->getAppValue('pln_site_checksum_type', 'sha1');
