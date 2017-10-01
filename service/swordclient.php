@@ -41,12 +41,6 @@ class SwordClient {
     private $ns;
 
     /**
-     *
-     * @var SimpleXMLElement
-     */
-    private $serviceDocument;
-
-    /**
      * Build the client.
      * 
      * @param PlnConfig $config
@@ -84,7 +78,7 @@ class SwordClient {
      * @param IUser $user
      * @throws Exception if the server returns something that isn't XML.
      */
-    protected function fetchServiceDocument(IUser $user) {
+    protected function getServiceDocument(IUser $user) {
         $sdIri = $this->config->getSystemValue('pln_site_url');
         if (!$sdIri) {
             throw new Exception("Cannot find PLN Service Document URL.");
@@ -105,20 +99,7 @@ class SwordClient {
             throw new Exception("Cannot parse service document: " . implode("\n", libxml_get_errors()));
         }
         $this->ns->registerNamespaces($xml);
-        $this->serviceDocument = $xml;
-    }
-
-    /**
-     * Gets the service document and caches it for reuse.
-     * 
-     * @param IUser $user
-     * @return SimpleXMLElement
-     */
-    public function getServiceDocument(IUser $user) {
-        if (!$this->serviceDocument) {
-            $this->fetchServiceDocument($user);
-        }
-        return $this->serviceDocument;
+        return $xml;
     }
 
     /**
@@ -128,8 +109,8 @@ class SwordClient {
      * @return string
      */
     public function getTermsUpdated(IUser $user) {
-        $this->getServiceDocument($user);
-        return (string) $this->serviceDocument->xpath('//pkp:terms_of_use/@updated')[0];
+        $serviceDoc = $this->getServiceDocument($user);
+        return (string) $serviceDoc->xpath('//pkp:terms_of_use/@updated')[0];
     }
 
     /**
@@ -139,8 +120,8 @@ class SwordClient {
      * @return array
      */
     public function getTermsOfUse(IUser $user) {
-        $this->getServiceDocument($user);
-        $termsXml = $this->serviceDocument->xpath('//pkp:terms_of_use/pkp:*');
+        $serviceDoc = $this->getServiceDocument($user);
+        $termsXml = $serviceDoc->xpath('//pkp:terms_of_use/pkp:*');
         $terms = array();
         foreach ($termsXml as $xml) {
             $terms[] = array(
@@ -158,11 +139,8 @@ class SwordClient {
      * @return string
      */
     public function getColIri(IUser $user) {
-        $this->getServiceDocument($user);
-        if (!$this->serviceDocument) {
-            return null;
-        }
-        $href = $this->serviceDocument->xpath('//app:collection/@href');
+        $serviceDoc = $this->getServiceDocument($user);
+        $href = $serviceDoc->xpath('//app:collection/@href');
         return (string) $href[0];
     }
 
@@ -173,11 +151,8 @@ class SwordClient {
      * @return boolean
      */
     public function isAccepting(IUser $user) {
-        $this->getServiceDocument($user);
-        if (!$this->serviceDocument) {
-            return null;
-        }
-        $accepting = $this->serviceDocument->xpath('//pkp:pln_accepting/@is_accepting');
+        $serviceDoc = $this->getServiceDocument($user);
+        $accepting = $serviceDoc->xpath('//pkp:pln_accepting/@is_accepting');
         return('Yes' === (string) $accepting[0]);
     }
 
@@ -188,11 +163,8 @@ class SwordClient {
      * @return string
      */
     public function getMessage(IUser $user) {
-        $this->getServiceDocument($user);
-        if (!$this->serviceDocument) {
-            return null;
-        }
-        $message = $this->serviceDocument->xpath('//pkp:pln_accepting/text()');
+        $serviceDoc = $this->getServiceDocument($user);
+        $message = $serviceDoc->xpath('//pkp:pln_accepting/text()');
         return (string) $message[0];
     }
 
@@ -205,6 +177,10 @@ class SwordClient {
      * @return array
      */
     public function createDeposit(IUser $user, DOMDocument $atom) {
+        if( ! $this->isAccepting($user)) {
+            throw new Exception("The staging server is not accepting deposits from {$user->getUID()}.");
+        }
+        
         $colIri = $this->getColIri($user);
         $request = $this->httpClient->createRequest('POST', $colIri);
         $request->setBody(Stream::factory($atom->saveXML()));
@@ -217,10 +193,6 @@ class SwordClient {
         $this->ns->registerNamespaces($xml);
 
         return array('location' => $location, 'xml' => $xml);
-    }
-
-    public function reciept() {
-        
     }
 
     public function statement() {

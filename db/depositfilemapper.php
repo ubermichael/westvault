@@ -104,4 +104,9 @@ class DepositFileMapper extends Mapper {
         $sql = "SELECT * FROM " . self::TBL . " WHERE `date_sent` IS NULL ORDER BY `id`";
         return $this->findEntities($sql);        
     }
+    
+    public function findNotChecked() {
+        $sql = "SELECT * FROM " . self::TBL . " WHERE `date_checked` IS NULL OR `date_checked` < :past ORDER BY `id`";
+        return $this->findEntities($sql, array('past' => time() - ( 24 * 60 * 60 )));        
+    }
 }

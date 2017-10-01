@@ -87,7 +87,7 @@ class DepositorService {
                 print $ex->getMessage() . "\n";
                 print $ex->getResponse()->getBody() . "\n";
             } catch (Exception $ex) {
-                print get_class($ex) . "\n" . $ex->getMessage();
+                print get_class($ex) . "\n" . $ex->getMessage() . "\n" ;
             }
         }
     }
