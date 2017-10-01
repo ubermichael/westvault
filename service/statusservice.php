@@ -65,7 +65,6 @@ class StatusService {
         $this->mapper = $mapper;
         $this->generator = $generator;
         $this->manager = $manager;
-        print "construct.\n";
     }
 
     public function run() {
@@ -74,9 +73,12 @@ class StatusService {
             return;
         }
         foreach ($files as $file) {
-            print $file->getPath() . "\n";
-            
-            continue;
+            $user = $this->manager->get($file->getUserId());
+            $states = $this->client->statement($user, $file->getPlnUrl());
+            $file->setPlnStatus($states['pln']);
+            $file->setLockssStatus($states['lockss']);
+            $file->setDateChecked(time());
+            $this->mapper->update($file);
         }
     }
 }

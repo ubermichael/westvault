@@ -195,8 +195,23 @@ class SwordClient {
         return array('location' => $location, 'xml' => $xml);
     }
 
-    public function statement() {
-        
+    public function statement(IUser $user, $plnUrl) {
+        if( ! $this->isAccepting($user)) {
+            throw new Exception("The staging server is not accepting deposits from {$user->getUID()}.");
+        }
+        $request = $this->httpClient->createRequest('GET', $plnUrl);
+        $response = $this->httpClient->send($request, []);
+        $xml = simplexml_load_string($response->getBody());
+        if ($xml === false) {
+            throw new Exception("Cannot parse response document: " . implode("\n", libxml_get_errors()));
+        }
+        $this->ns->registerNamespaces($xml);
+        $plnStatus = (string)$xml->xpath('//atom:category[@label="Processing State"]/@term')[0];
+        $lockssStatus = (string)$xml->xpath('//atom:category[@label="PLN State"]/@term')[0];
+        return array(
+            'pln' => $plnStatus,
+            'lockss' => $lockssStatus,
+        );
     }
 
 }
