@@ -12,6 +12,7 @@ namespace OCA\WestVault\Controller;
 use DateTime;
 use Exception;
 use OC\Files\Node\Root;
+use OCA\WestVault\Service\DepositorService;
 use OCA\WestVault\Service\Navigation;
 use OCA\WestVault\Service\SwordClient;
 use OCA\WestVault\Service\WestVaultConfig;
@@ -58,7 +59,7 @@ class ConfigController extends Controller {
      * @var Root
      */
     private $root;
-
+    
     /**
      * Build the controller.
      * 
@@ -94,6 +95,10 @@ class ConfigController extends Controller {
             'navigation' => $this->navigation->linkList(),
             'user' => $this->user,
             'isAdmin' => $this->groupManager->isAdmin($this->user->getUID()),
+            
+            'pln_accepting' => $this->client->isAccepting($this->user),
+            'pln_message' => $this->client->getMessage($this->user),
+            
             'pln_site_ignore' => $this->config->getAppValue('pln_site_ignore'),
             'pln_site_checksum_type' => $this->config->getAppValue('pln_site_checksum_type', 'sha1'),
             'pln_site_url' => $this->config->getSystemValue('pln_site_url'),

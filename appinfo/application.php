@@ -103,7 +103,7 @@ class Application extends App {
         $container->registerService('SwordClient', function($c){
             return new SwordClient(
                 $c->query('WestVaultConfig'),
-                $c->query('OCP\IURLGenerator')
+                $c->query('Logger')
             );
         });
         

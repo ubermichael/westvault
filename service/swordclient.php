@@ -7,6 +7,7 @@ use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Stream\Stream;
 use OCA\WestVault\Util\Namespaces;
+use OCP\ILogger;
 use OCP\IUser;
 use Ramsey\Uuid\Uuid;
 use SimpleXMLElement;
@@ -30,6 +31,11 @@ class SwordClient {
     private $httpClient;
 
     /**
+     * @var ILogger 
+     */
+    private $logger;
+
+    /**
      * @var Namespaces
      */
     private $ns;
@@ -45,8 +51,9 @@ class SwordClient {
      * 
      * @param PlnConfig $config
      */
-    public function __construct(WestVaultConfig $config) {
+    public function __construct(WestVaultConfig $config, ILogger $logger) {
         $this->config = $config;
+        $this->logger = $logger;
         $this->ns = new Namespaces();
     }
 
@@ -80,10 +87,10 @@ class SwordClient {
     protected function fetchServiceDocument(IUser $user) {
         $sdIri = $this->config->getSystemValue('pln_site_url');
         if (!$sdIri) {
-            throw new Exception("Cannot find PLN Service Document URL");
+            throw new Exception("Cannot find PLN Service Document URL.");
         }
         $uuid = $this->config->getUserValue('pln_user_uuid', $user->getUID());
-        if( ! $uuid) {
+        if (!$uuid) {
             $uuid = Uuid::NIL;
         }
         $client = $this->getClient();
@@ -94,7 +101,7 @@ class SwordClient {
 
         $response = $client->get($sdIri, ['headers' => $headers]);
         $xml = simplexml_load_string($response->getBody());
-        if($xml === false) {
+        if ($xml === false) {
             throw new Exception("Cannot parse service document: " . implode("\n", libxml_get_errors()));
         }
         $this->ns->registerNamespaces($xml);
@@ -113,7 +120,7 @@ class SwordClient {
         }
         return $this->serviceDocument;
     }
-    
+
     /**
      * Find when the term of use were most recently updated.
      * 
@@ -122,7 +129,7 @@ class SwordClient {
      */
     public function getTermsUpdated(IUser $user) {
         $this->getServiceDocument($user);
-        return (string)$this->serviceDocument->xpath('//pkp:terms_of_use/@updated')[0];    
+        return (string) $this->serviceDocument->xpath('//pkp:terms_of_use/@updated')[0];
     }
 
     /**
@@ -156,7 +163,37 @@ class SwordClient {
             return null;
         }
         $href = $this->serviceDocument->xpath('//app:collection/@href');
-        return (string)$href[0];
+        return (string) $href[0];
+    }
+
+    /**
+     * Returns true if the PLN will accept deposits from the user.
+     * 
+     * @param IUser $user
+     * @return boolean
+     */
+    public function isAccepting(IUser $user) {
+        $this->getServiceDocument($user);
+        if (!$this->serviceDocument) {
+            return null;
+        }
+        $accepting = $this->serviceDocument->xpath('//pkp:pln_accepting/@is_accepting');
+        return('Yes' === (string) $accepting[0]);
+    }
+
+    /**
+     * Gets the server message.
+     * 
+     * @param IUser $user
+     * @return string
+     */
+    public function getMessage(IUser $user) {
+        $this->getServiceDocument($user);
+        if (!$this->serviceDocument) {
+            return null;
+        }
+        $message = $this->serviceDocument->xpath('//pkp:pln_accepting/text()');
+        return (string) $message[0];
     }
 
     /**
@@ -168,14 +205,14 @@ class SwordClient {
     public function createDeposit(IUser $user, DOMDocument $atom) {
         $colIri = $this->getColIri($user);
         $request = $this->httpClient->createRequest('POST', $colIri);
-        $request->setBody(Stream::factory($atom->saveXML()));        
+        $request->setBody(Stream::factory($atom->saveXML()));
         $response = $this->httpClient->send($request, []);
         $xml = simplexml_load_string($response->getBody());
-        if($xml === false) {
+        if ($xml === false) {
             throw new Exception("Cannot parse response document: " . implode("\n", libxml_get_errors()));
         }
         $this->ns->registerNamespaces($xml);
-        
+
         return $xml;
     }
 

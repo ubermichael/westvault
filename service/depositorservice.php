@@ -52,8 +52,8 @@ class DepositorService {
         foreach ($files as $file) {
             $user = $this->manager->get($file->getUserId());
             try {
-                $atom = $this->generateDepositXml($user, $file);
-                $responseXml = $this->client->createDeposit($user, $atom);
+                $atom = $this->generateDepositXml($user, $file);                
+                $responseXml = $this->client->createDeposit($user, $atom);                
                 print $responseXml->asXML();
             } catch (ServerException $ex) {
                 print $ex->getMessage() . "\n";
