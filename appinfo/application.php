@@ -40,6 +40,10 @@ class Application extends App {
          */
         $container = $this->getContainer();
 
+        $container->registerService('Logger', function($c) {
+            return $c->query('ServerContainer')->getLogger();
+        });
+
         // User Session gets information about the logged in user. It must be
         // registered so that the User service can use it.
         $container->registerService('UserSession', function($c) {
@@ -115,7 +119,8 @@ class Application extends App {
                     $c->query('ServerContainer')->getUserManager(),
                     $c->query('WestVaultConfig'),        
                     $c->query('ServerContainer')->getRootFolder(),
-                    $c->query('DepositFileMapper')
+                    $c->query('DepositFileMapper'),
+                    $c->query('Logger')
             );
         });
         
