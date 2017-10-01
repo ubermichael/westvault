@@ -58,6 +58,12 @@
                 <length>64</length>
             </field>
             <field>
+                <name>pln_url</name>
+                <type>text</type>
+                <notnull>false</notnull>
+                <length>200</length>
+            </field>
+            <field>
                 <name>lockss_status</name>
                 <type>text</type>
                 <notnull>false</notnull>

@@ -55,6 +55,11 @@ class DepositFile extends Entity {
     /**
      * @var string
      */
+    protected $plnUrl;
+    
+    /**
+     * @var string
+     */
     protected $lockssStatus;
     
     /**

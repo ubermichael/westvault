@@ -81,7 +81,10 @@ class Application extends App {
                     $c->query('Request'), 
                     $c->query('User'), 
                     $c->query('WestVaultNavigation'),
-                    $c->query('DepositFileMapper')
+                    $c->query('WestVaultConfig'),
+                    $c->query('DepositFileMapper'),
+                    $c->query('ServerContainer')->getRootFolder()
+                    
             );
         });
         

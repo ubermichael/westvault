@@ -28,11 +28,34 @@ use OCP\IUserManager;
  */
 class DepositorService {
 
+    /**
+     * @var WestVaultConfig
+     */
     private $config;
+    
+    /**
+     * @var SwordClient
+     */
     private $client;
+    
+    /**
+     * @var Root
+     */
     private $root;
+    
+    /**
+     * @var DepositFileMapper
+     */
     private $mapper;
+    
+    /**
+     * @var IURLGenerator
+     */
     private $generator;
+    
+    /**
+     * @var IUserManager
+     */
     private $manager;
 
     public function __construct(WestVaultConfig $config, SwordClient $client, Root $root, DepositFileMapper $mapper, IURLGenerator $generator, IUserManager $manager) {
@@ -52,9 +75,14 @@ class DepositorService {
         foreach ($files as $file) {
             $user = $this->manager->get($file->getUserId());
             try {
-                $atom = $this->generateDepositXml($user, $file);                
-                $responseXml = $this->client->createDeposit($user, $atom);                
-                print $responseXml->asXML();
+                $atom = $this->generateDepositXml($user, $file);                  
+                $response = $this->client->createDeposit($user, $atom);                
+                $location = $response['location'];
+                $responseXml = $response['xml'];                
+                $file->setDateSent(time());
+                $file->setPlnStatus((string)$responseXml->xpath('//atom:category[@label="Processing State"]/@term')[0]);
+                $file->setPlnUrl($location);                
+                $this->mapper->update($file);
             } catch (ServerException $ex) {
                 print $ex->getMessage() . "\n";
                 print $ex->getResponse()->getBody() . "\n";
@@ -79,7 +107,6 @@ class DepositorService {
         $entry->appendChild($atom->createElement('id', 'urn:uuid:' . $depositFile->getUuid()));
         $entry->appendChild($atom->createElement('updated', strftime("%FT%TZ")));
         try {
-            // $this->storage->getById() doesn't work here. no idea why.
             $file = $this->root->get($depositFile->getPath());
         } catch (Exception $e) {
             die($e->getMessage());

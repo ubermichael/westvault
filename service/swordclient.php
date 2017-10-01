@@ -197,10 +197,12 @@ class SwordClient {
     }
 
     /**
-     * Create a deposit in the staging server.
+     * Create a deposit in the staging server. The returned array has keys 
+     * 'location' and 'xml' which are the location of the SWORD statement for 
+     * the deposit and the SimpleXML response body, respectively.
      * 
      * @param DOMDocument $atom
-     * @return SimpleXMLElement
+     * @return array
      */
     public function createDeposit(IUser $user, DOMDocument $atom) {
         $colIri = $this->getColIri($user);
@@ -208,12 +210,13 @@ class SwordClient {
         $request->setBody(Stream::factory($atom->saveXML()));
         $response = $this->httpClient->send($request, []);
         $xml = simplexml_load_string($response->getBody());
+        $location = $response->getHeader('Location');
         if ($xml === false) {
             throw new Exception("Cannot parse response document: " . implode("\n", libxml_get_errors()));
         }
         $this->ns->registerNamespaces($xml);
 
-        return $xml;
+        return array('location' => $location, 'xml' => $xml);
     }
 
     public function reciept() {

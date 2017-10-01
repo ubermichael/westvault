@@ -12,7 +12,6 @@ namespace OCA\WestVault\Controller;
 use DateTime;
 use Exception;
 use OC\Files\Node\Root;
-use OCA\WestVault\Service\DepositorService;
 use OCA\WestVault\Service\Navigation;
 use OCA\WestVault\Service\SwordClient;
 use OCA\WestVault\Service\WestVaultConfig;

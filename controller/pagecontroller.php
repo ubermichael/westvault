@@ -12,9 +12,12 @@
 
 namespace OCA\WestVault\Controller;
 
+use OC\Files\Node\Root;
 use OCA\WestVault\Db\DepositFileMapper;
 use OCA\WestVault\Service\Navigation;
+use OCA\WestVault\Service\WestVaultConfig;
 use OCP\AppFramework\Controller;
+use OCP\AppFramework\Http\StreamResponse;
 use OCP\AppFramework\Http\TemplateResponse;
 use OCP\IRequest;
 use OCP\IUser;
@@ -34,6 +37,21 @@ class PageController extends Controller {
      * @var Navigation
      */
     private $navigation;
+    
+    /**
+     * @var Root
+     */
+    private $root;
+    
+    /**
+     * @var DepositFileMapper
+     */
+    private $mapper;
+    
+    /**
+     * @var WestVaultConfig
+     */
+    private $config;
 
     /**
      * Build the controller.
@@ -44,11 +62,13 @@ class PageController extends Controller {
      * @param Navigation $navigation
      * @param DepositFileMapper $mapper
      */
-    public function __construct($AppName, IRequest $request, IUser $user, Navigation $navigation, DepositFileMapper $mapper) {        
+    public function __construct($AppName, IRequest $request, IUser $user, Navigation $navigation, WestVaultConfig $config, DepositFileMapper $mapper, Root $root) {        
         parent::__construct($AppName, $request);
         $this->user = $user;
         $this->navigation = $navigation;
+        $this->config = $config;
         $this->mapper = $mapper;
+        $this->root = $root;
     }
 
     /**
@@ -64,5 +84,23 @@ class PageController extends Controller {
             'deposits' => $this->mapper->findByUser($this->user),
         ];
         return new TemplateResponse('westvault', 'main', $params);  // templates/main.php
+    }
+    
+    /**
+     * Let the PLN download a deposit.
+     * 
+     * @NoAdminRequired
+     * @NoCSRFRequired
+     * @PublicPage
+     */
+    public function fetch($uuid) {
+        $depositFile = $this->mapper->findByUuid($uuid);
+        $file = $this->root->get($depositFile->getPath());
+
+        $response = new StreamResponse($this->config->getSystemValue('datadirectory') . $file->getPath());
+        $response->addHeader('Content-Type', $file->getMimeType());
+        $response->addHeader('Content-Length', $file->getSize());
+        return $response;
+        
     }
 }
