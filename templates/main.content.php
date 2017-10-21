@@ -7,7 +7,6 @@
             <th>Path</th>
             <th>Staging Status</th>
             <th>LOCKSS Status</th>
-            <th>Agreement</th>
             <th></th>
         </tr>
     </thead>
@@ -17,7 +16,6 @@
             <td class="path"><?php echo basename($deposit->getPath()); ?></td>
             <td class="status"><?php echo $deposit->getPlnStatus(); ?></td>
             <td class="status"><?php echo $deposit->getLockssStatus(); ?></td>
-            <td class="status"><?php echo $deposit->getAgreement(); ?></td>
             <td class="status"><button class="restore" data-id="<?php p($deposit->getId()) ?>">Restore</button></td>
         </tr>
         <?php endforeach ?>
