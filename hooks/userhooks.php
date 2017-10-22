@@ -47,7 +47,7 @@ class UserHooks {
      * @var DepositFileMapper
      */
     private $mapper;
-    
+
     /**
      * @var ILogger
      */
@@ -99,21 +99,21 @@ class UserHooks {
             return;
         }
         $uid = $file->getOwner()->getUID();
-        if( ! $this->config->getUserValue('pln_user_agreed', $uid, null)) {
+        if (!$this->config->getUserValue('pln_user_agreed', $uid, null)) {
             return;
         }
-        if( ! $this->config->getUserValue('pln_user_preserved_folder', $uid, null)) {
+        if (!$this->config->getUserValue('pln_user_preserved_folder', $uid, null)) {
             return;
         }
-        foreach($this->config->getIgnoredPatterns($uid) as $pattern) {
-            if(preg_match("/^{$pattern}$/", $file->getName())) {
+        foreach ($this->config->getIgnoredPatterns($uid) as $pattern) {
+            if (preg_match("/^{$pattern}$/", $file->getName())) {
                 return;
             }
         }
-        $watchFolder = $this->config->getUserValue('pln_user_preserved_folder', $uid);        
+        $watchFolder = $this->config->getUserValue('pln_user_preserved_folder', $uid);
         $userPath = $this->root->getUserFolder($uid)->getPath();
-        $localPath = substr($file->getPath(), strlen($userPath)+1);
-        if(strncmp($localPath, $watchFolder, strlen($watchFolder) !== 0)) {
+        $localPath = substr($file->getPath(), strlen($userPath) + 1);
+        if (strncmp($localPath, $watchFolder, strlen($watchFolder) !== 0)) {
             return;
         }
         $checksumType = $this->config->getAppValue('pln_site_checksum_type', 'sha1');
@@ -128,19 +128,16 @@ class UserHooks {
         $depositFile->setDateChecked(null);
         $this->mapper->insert($depositFile);
     }
-    
+
     /**
-     * Callback for after a file is deleted.
+     * Callback for the post file create hook.
      * 
-     * @param File $file
-     * @return null;
+     * @param Node $file
+     * @return null
      */
-    public function postDelete(File $file) {
-        if ($file->getType() !== FileInfo::TYPE_FILE) {
-            return;
-        }
-        $depositFile = $this->mapper->findByFileId($file->getId());
-        if( ! $depositFile) {
+    public function postDelete(Node $file) {
+        $depositFile = $this->mapper->findByPath($file->getPath());
+        if( ! $depositFile || $depositFile->sent()) {
             return;
         }
         $this->mapper->delete($depositFile);

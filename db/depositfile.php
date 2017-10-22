@@ -86,6 +86,15 @@ class DepositFile extends Entity {
     }
     
     /**
+     * Check if the file has been sent to the PLN.
+     * 
+     * @return boolean
+     */
+    public function sent() {
+        return $this->plnUrl !== null;
+    }
+    
+    /**
      * @return string
      */
     public function filename() {

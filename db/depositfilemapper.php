@@ -107,10 +107,15 @@ class DepositFileMapper extends Mapper {
     
     public function findNotChecked($all = false) {
         if($all) {
-            $sql = "SELECT * FROM " . self::TBL . " ORDER BY `id`";
+            $sql = "SELECT * FROM " . self::TBL . " WHERE (`lockss_status` is null OR `lockss_status` <> 'agreement') ORDER BY `id`";
         } else {
-            $sql = "SELECT * FROM " . self::TBL . " WHERE `date_checked` IS NULL OR `date_checked` < :past ORDER BY `id`";
-        }
+            $sql = "SELECT * FROM " . self::TBL . " WHERE (`lockss_status` is null OR `lockss_status` <> 'agreement') AND (`date_checked` IS NULL OR `date_checked` < :past) ORDER BY `id`";
+        }   
         return $this->findEntities($sql, array('past' => time() - ( 24 * 60 * 60 )));        
+    }
+    
+    public function findRestoreQueue() {
+        $sql = "SELECT * FROM " . self::TBL . " WHERE `pln_status` = 'restore' ORDER BY `id`";
+        return $this->findEntities($sql);        
     }
 }

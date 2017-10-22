@@ -72,17 +72,19 @@ class DepositorService {
         if (count($files) === 0) {
             return;
         }
-        foreach ($files as $file) {
-            $user = $this->manager->get($file->getUserId());
+        foreach ($files as $depositFile) {
+            $user = $this->manager->get($depositFile->getUserId());
             try {
-                $atom = $this->generateDepositXml($user, $file);                  
+//                $file = $this->root->get($depositFile->getPath());
+//                $file->lock(\OCP\Lock\ILockingProvider::LOCK_SHARED);
+                $atom = $this->generateDepositXml($user, $depositFile);                  
                 $response = $this->client->createDeposit($user, $atom);                
                 $location = $response['location'];
                 $responseXml = $response['xml'];                
-                $file->setDateSent(time());
-                $file->setPlnStatus((string)$responseXml->xpath('//atom:category[@label="Processing State"]/@term')[0]);
-                $file->setPlnUrl($location);                
-                $this->mapper->update($file);
+                $depositFile->setDateSent(time());
+                $depositFile->setPlnStatus((string)$responseXml->xpath('//atom:category[@label="Processing State"]/@term')[0]);
+                $depositFile->setPlnUrl($location);                
+                $this->mapper->update($depositFile);
             } catch (ServerException $ex) {
                 print $ex->getMessage() . "\n";
                 print $ex->getResponse()->getBody() . "\n";

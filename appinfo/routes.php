@@ -22,6 +22,7 @@ $application = new Application();
 $application->registerRoutes($this, array(
     'routes' => [
         ['name' => 'page#index', 'url' => '/', 'verb' => 'GET'],        
+        ['name' => 'page#restore', 'url' => '/restore', 'verb' => 'POST'],
         ['name' => 'page#fetch', 'url' => '/fetch/{uuid}', 'verb' => 'GET'],
         ['name' => 'page#fetchHead', 'url' => '/fetch/{uuid}', 'method' => 'HEAD'],
         

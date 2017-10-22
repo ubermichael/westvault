@@ -118,6 +118,7 @@ class WestVaultConfig {
      * @return string
      */
     public function setUserValue($key, $userId, $value) {
+        // never change the uuid.
         if($key === 'uuid' && $this->config->getUserValue($userId, 'uuid', null) !== null) {
             return;
         }

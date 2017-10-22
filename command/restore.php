@@ -19,7 +19,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  *
  * @author Michael Joyce <ubermichael@gmail.com>
  */
-class Status extends Command {
+class Restore extends Command {
     
     public function __construct($name = null) {
         parent::__construct($name);
@@ -27,17 +27,15 @@ class Status extends Command {
 
     protected function configure() {
         parent::configure();
-        $this->setName('westvault:status');
-        $this->setDescription('Check the status of deposits in West Vault');
-        $this->addOption('all', 'a', InputOption::VALUE_NONE, 'Check all deposits');
+        $this->setName('westvault:restore');
+        $this->setDescription('Restore queued deposits from LOCKSS');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output) {
         $app = new Application('westvault');
-        $all = $input->getOption('all');
         $container = $app->getContainer();
-        $checker = $container->query('StatusService');
-        $checker->run($all);
+        $restorer = $container->query('RestoreService');
+        $restorer->run();
     }
 
 }

@@ -214,4 +214,18 @@ class SwordClient {
         );
     }
 
+    public function restoreUrl(IUser $user, $plnUrl) {
+        if( ! $this->isAccepting($user)) {
+            throw new Exception("The staging server is not accepting deposits from {$user->getUID()}.");
+        }
+        $request = $this->httpClient->createRequest('GET', $plnUrl);
+        $response = $this->httpClient->send($request, []);
+        $xml = simplexml_load_string($response->getBody());
+        if ($xml === false) {
+            throw new Exception("Cannot parse response document: " . implode("\n", libxml_get_errors()));
+        }
+        $this->ns->registerNamespaces($xml);
+        print $xml->asXML();
+    }
+
 }

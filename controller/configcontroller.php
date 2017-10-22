@@ -108,7 +108,7 @@ class ConfigController extends Controller {
             'pln_user_ignore' => $this->config->getUserValue('pln_user_ignore', $this->user->getUID()),
             'pln_user_preserved_folder' => $this->config->getUserValue('pln_user_preserved_folder', $this->user->getUID(), 'lockss-preserved'),
             'pln_user_restored_folder' => $this->config->getUserValue('pln_user_restored_folder', $this->user->getUID(), 'lockss-restored'),
-            'pln_user_cleanup' => $this->config->getUserValue('pln_user_cleanup', $this->user->getUID(), true),
+            'pln_user_cleanup' => $this->config->getUserValue('pln_user_cleanup', $this->user->getUID(), false),
             'pln_user_agreed' => unserialize($this->config->getUserValue('pln_user_agreed', $this->user->getUID(), 'N;')),
         ];
         return new TemplateResponse($this->appName, 'config', $params);  // templates/config.php        
@@ -223,7 +223,7 @@ class ConfigController extends Controller {
             $this->config->setUserValue('pln_user_ignore', $this->user->getUID(), $this->request->getParam('pln_user_ignore'));
             $this->config->setUserValue('pln_user_preserved_folder', $this->user->getUID(), $this->request->getParam('pln_user_preserved_folder'));
             $this->config->setUserValue('pln_user_restored_folder', $this->user->getUID(), $this->request->getParam('pln_user_restored_folder'));
-            $this->config->setUserValue('pln_user_cleanup', $this->user->getUID(), serialize('agreed' === $this->request->getParam('pln_user_cleanup')));
+            $this->config->setUserValue('pln_user_cleanup', $this->user->getUID(), $this->request->getParam('pln_user_cleanup', 'leave'));
             $this->checkUserFolder($this->config->getUserValue('pln_user_preserved_folder', $this->user->getUID()));
             $this->checkUserFolder($this->config->getUserValue('pln_user_restored_folder', $this->user->getUID()));
 

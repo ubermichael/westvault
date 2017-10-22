@@ -31,7 +31,7 @@ class Deposit extends Command {
         $app = new Application('westvault');
         $container = $app->getContainer();
         try {
-        $container->query('DepositService')->run();
+            $container->query('DepositService')->run();
         } catch(\Exception $e) {
             $output->write($e->getMessage());
         }

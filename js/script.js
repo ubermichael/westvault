@@ -31,6 +31,15 @@
     }
 
     $(document).ready(function () {
+        $("#restore").click(function(e){
+            e.preventDefault();
+            var url = OC.generateUrl('/apps/westvault/restore');
+            var data = {
+                uuid: $(this).data('uuid'),
+            };
+            postConfig(url, data);
+        });
+        
         $("#user_save").click(function (e) {
             e.preventDefault();
             var url = OC.generateUrl('/apps/westvault/config/save-user');

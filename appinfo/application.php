@@ -15,6 +15,7 @@ use OCA\WestVault\Db\DepositFileMapper;
 use OCA\WestVault\Hooks\UserHooks;
 use OCA\WestVault\Service\DepositorService;
 use OCA\WestVault\Service\Navigation;
+use OCA\WestVault\Service\RestoreService;
 use OCA\WestVault\Service\StatusService;
 use OCA\WestVault\Service\SwordClient;
 use OCA\WestVault\Service\WestVaultConfig;
@@ -130,6 +131,17 @@ class Application extends App {
         
         $container->registerService('DepositService', function($c){
             return new DepositorService(
+                    $c->query('WestVaultConfig'),
+                    $c->query('SwordClient'),
+                    $c->query('ServerContainer')->getRootFolder(),
+                    $c->query('DepositFileMapper'),
+                    $c->query('OCP\IURLGenerator'),
+                    $c->query('ServerContainer')->getUserManager()
+            );
+        });
+        
+        $container->registerService('RestoreService', function($c){
+            return new RestoreService(
                     $c->query('WestVaultConfig'),
                     $c->query('SwordClient'),
                     $c->query('ServerContainer')->getRootFolder(),

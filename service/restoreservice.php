@@ -21,7 +21,7 @@ use OCP\IUserManager;
  *
  * @author Michael Joyce <ubermichael@gmail.com>
  */
-class StatusService {
+class RestoreService {
 
     /**
      * @var WestVaultConfig
@@ -63,27 +63,15 @@ class StatusService {
     }
 
     public function run($all = false) {
-        $files = $this->mapper->findNotChecked($all);
+        $files = $this->mapper->findRestoreQueue();
         if (count($files) === 0) {
             return;
         }
-        foreach ($files as $depositFile) {
-            print $depositFile->getPath() . "\n";
+        foreach ($files as $depositFile) {            
+            print "restore: " . $depositFile->getPath() . "\n";
             $user = $this->manager->get($depositFile->getUserId());
-            $states = $this->client->statement($user, $depositFile->getPlnUrl());
-            $depositFile->setPlnStatus($states['pln']);
-            $depositFile->setLockssStatus($states['lockss']);
-            if($states['lockss'] === 'agreement' && $this->config->getUserValue('pln_user_cleanup', $user->getUID(), 'b:0') === 'cleanup') {
-                try {
-                    $file = $this->root->get($depositFile->getPath());
-                    $file->delete();
-                } catch (\Exception $e) {
-                    print get_class($e) . $e->getMessage() . "\n";
-                    print $e->getTraceAsString() . "\n";
-                }
-            }
-            $depositFile->setDateChecked(time());
-            $this->mapper->update($depositFile);
+            $url = $this->client->restoreUrl($user, $depositFile->getPlnUrl());
+            
         }
     }
 }
