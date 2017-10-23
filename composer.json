@@ -1,0 +1,15 @@
+{
+    "name": "ubermichael/westvault",
+    "description": "OwnCloud-based front end for the West Vault preservation service.",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Michael Joyce",
+            "email": "ubermichael@gmail.com"
+        }
+    ],
+    "require": {
+        "ramsey/uuid": "^3.7"
+    }
+}

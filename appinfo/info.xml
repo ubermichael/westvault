@@ -2,13 +2,16 @@
 <info>
     <id>westvault</id>
     <name>West Vault</name>
-    <description>My first ownCloud app</description>
-    <licence>AGPL</licence>
+    <description>OwnCloud-based front end for the West Vault preservation service.</description>
+    <licence>MIT</licence>
     <author>Michael Joyce</author>
-    <version>0.0.1</version>
+    <version>0.0.5</version>
     <namespace>WestVault</namespace>
     <category>other</category>
     <dependencies>
-        <owncloud min-version="9.0" />
+        <owncloud min-version="9.0" max-version="10.0"/>
     </dependencies>
+    <types>
+        <filesystem/>
+    </types>
 </info>
