@@ -10,19 +10,15 @@
 
 (function ($, OC) {
 
-    /**
-     * Post a configuration form to the config controller.
-     * 
-     * @param string url
-     * @param array formData
-     * @returns null
-     */
-    function postConfig(url, formData) {
+    function postConfig(url, formData, callback = null) {
         $.ajax(url, {
             method: 'POST',
             data: formData,
             success: function (responseData, status, jqXhr) {
                 alert(responseData.message);
+                if(callback) {
+                    callback(responseData);
+                }
             },
             error: function (jqXhr, status, error) {
                 alert("Error: " + status + " " + error);
@@ -31,13 +27,16 @@
     }
 
     $(document).ready(function () {
-        $("#restore").click(function(e){
+        $(".restore").click(function(e){            
             e.preventDefault();
+            var $this = $(this);
             var url = OC.generateUrl('/apps/westvault/restore');
             var data = {
                 uuid: $(this).data('uuid'),
             };
-            postConfig(url, data);
+            postConfig(url, data, function(data){
+                $this.parent().parent().find('.pln-status').text('restore');
+            });
         });
         
         $("#user_save").click(function (e) {

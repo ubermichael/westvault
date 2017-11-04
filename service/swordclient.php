@@ -225,7 +225,14 @@ class SwordClient {
             throw new Exception("Cannot parse response document: " . implode("\n", libxml_get_errors()));
         }
         $this->ns->registerNamespaces($xml);
-        print $xml->asXML();
+        $elements = $xml->xpath('//sword:originalDeposit');
+        if( ! $elements || count($elements) < 1) {
+            return null;
+        }
+        if(count($elements) > 1) {
+            throw new Exception("Multiple content items in deposits are not supported.");
+        }
+        return $elements[0]['href'];
     }
 
 }

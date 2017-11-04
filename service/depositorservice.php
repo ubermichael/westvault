@@ -75,8 +75,6 @@ class DepositorService {
         foreach ($files as $depositFile) {
             $user = $this->manager->get($depositFile->getUserId());
             try {
-//                $file = $this->root->get($depositFile->getPath());
-//                $file->lock(\OCP\Lock\ILockingProvider::LOCK_SHARED);
                 $atom = $this->generateDepositXml($user, $depositFile);                  
                 $response = $this->client->createDeposit($user, $atom);                
                 $location = $response['location'];

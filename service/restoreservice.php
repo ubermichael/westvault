@@ -61,17 +61,29 @@ class RestoreService {
         $this->generator = $generator;
         $this->manager = $manager;
     }
-
-    public function run($all = false) {
+    
+    public function run() {
         $files = $this->mapper->findRestoreQueue();
-        if (count($files) === 0) {
-            return;
-        }
         foreach ($files as $depositFile) {            
-            print "restore: " . $depositFile->getPath() . "\n";
             $user = $this->manager->get($depositFile->getUserId());
-            $url = $this->client->restoreUrl($user, $depositFile->getPlnUrl());
+            $userFolder = $this->root->getUserFolder($depositFile->getUserId());
+            $restoreFolderName = $this->config->getUserValue('pln_user_restored_folder', $user->getUID());
+            $path = $restoreFolderName . '/' . $depositFile->filename();
+            $file = $userFolder->newFile($path); 
+            $handle = $file->fopen('w');
             
+            $url = $this->client->restoreUrl($user, $depositFile->getPlnUrl());
+            // @todo use a proper http client for this.
+            $remote = fopen($url, 'r');
+            
+            // read the file 64kb at a time.
+            while($data = fread($remote, 1024 * 64)) {
+                fwrite($handle, $data);
+            }
+            fclose($remote);
+            fclose($handle);
+            $depositFile->setPlnStatus('restore-complete');
+            $this->mapper->update($depositFile);
         }
     }
 }
