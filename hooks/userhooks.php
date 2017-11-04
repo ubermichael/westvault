@@ -113,9 +113,10 @@ class UserHooks {
         $watchFolder = $this->config->getUserValue('pln_user_preserved_folder', $uid);
         $userPath = $this->root->getUserFolder($uid)->getPath();
         $localPath = substr($file->getPath(), strlen($userPath) + 1);
-        if (strncmp($localPath, $watchFolder, strlen($watchFolder) !== 0)) {
+
+        if(substr($localPath, 0, strlen($watchFolder)) !== $watchFolder) {
             return;
-        }
+        }        
         $checksumType = $this->config->getAppValue('pln_site_checksum_type', 'sha1');
         $depositFile = new DepositFile();
         $depositFile->setFileId($file->getId());
@@ -130,7 +131,7 @@ class UserHooks {
     }
 
     /**
-     * Callback for the post file create hook.
+     * Callback for the post file delete hook.
      * 
      * @param Node $file
      * @return null
