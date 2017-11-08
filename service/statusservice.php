@@ -68,7 +68,6 @@ class StatusService {
             return;
         }
         foreach ($files as $depositFile) {
-            print $depositFile->getPath() . "\n";
             $user = $this->manager->get($depositFile->getUserId());
             $states = $this->client->statement($user, $depositFile->getPlnUrl());
             $depositFile->setPlnStatus($states['pln']);
