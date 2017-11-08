@@ -16,12 +16,12 @@
             <td class="path"><?php echo basename($depositFile->getPath()); ?></td>
             <td class="status pln-status"><?php echo $depositFile->getPlnStatus(); ?></td>
             <td class="status lockss-status"><?php echo $depositFile->getLockssStatus(); ?></td>
-            <td class="status button-status"><button class="restore" data-uuid="<?php p($depositFile->getUuid()) ?>">Restore</button></td>
+            <td class="status button-status">
+                <?php if($depositFile->getLockssStatus() === 'agreement'): ?>
+                <button class="restore" data-uuid="<?php p($depositFile->getUuid()) ?>">Restore</button>
+                <?php endif; ?>
+            </td>
         </tr>
         <?php endforeach ?>
     </tbody>
 </table>
-
-<p>
-    <button id="status-check">Check Status</button>
-</p>
