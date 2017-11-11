@@ -75,14 +75,21 @@ class RestoreService {
             $url = $this->client->restoreUrl($user, $depositFile->getPlnUrl());
             // @todo use a proper http client for this.
             $remote = fopen($url, 'r');
-            
+            $hashContext = hash_init($depositFile->getChecksumType());
+
             // read the file 64kb at a time.
             while($data = fread($remote, 1024 * 64)) {
                 fwrite($handle, $data);
+                hash_update($hashContext, $data);
             }
+            $hash = hash_final($hashContext);
             fclose($remote);
             fclose($handle);
-            $depositFile->setPlnStatus('restore-complete');
+            if($hash !== $depositFile->getChecksumValue()) {
+                $depositFile->setPlnStatus('restore-error');
+            } else {
+                $depositFile->setPlnStatus('restore-complete');
+            }
             $this->mapper->update($depositFile);
         }
     }
