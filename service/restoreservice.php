@@ -64,7 +64,9 @@ class RestoreService {
     
     public function run() {
         $files = $this->mapper->findRestoreQueue();
-        foreach ($files as $depositFile) {            
+        print "restoring " . count($files) . "\n";
+        foreach ($files as $depositFile) { 
+            print " - {$depositFile->filename()}\n";
             $user = $this->manager->get($depositFile->getUserId());
             $userFolder = $this->root->getUserFolder($depositFile->getUserId());
             $restoreFolderName = $this->config->getUserValue('pln_user_restored_folder', $user->getUID());
@@ -73,6 +75,7 @@ class RestoreService {
             $handle = $file->fopen('w');
             
             $url = $this->client->restoreUrl($user, $depositFile->getPlnUrl());
+            print "fetching from {$url}\n";
             // @todo use a proper http client for this.
             $remote = fopen($url, 'r');
             $hashContext = hash_init($depositFile->getChecksumType());

@@ -105,6 +105,9 @@ class DepositFileMapper extends Mapper {
         return $this->findEntities($sql);        
     }
     
+    /**
+     * @return DepositFile[]
+     */
     public function findNotChecked($all = false) {
         if($all) {
             $sql = "SELECT * FROM " . self::TBL . " WHERE (`pln_status` is not null) AND (`lockss_status` is null OR `lockss_status` <> 'agreement') ORDER BY `id`";
@@ -114,8 +117,11 @@ class DepositFileMapper extends Mapper {
         return $this->findEntities($sql, array('past' => time() - ( 24 * 60 * 60 )));        
     }
     
+    /**
+     * @return DepositFile[]
+     */
     public function findRestoreQueue() {
-        $sql = "SELECT * FROM " . self::TBL . " WHERE (`pln_status` = 'restore') AND (`lockss_status` = 'agreement') ORDER BY `id`";
+        $sql = "SELECT * FROM " . self::TBL . " WHERE (`pln_status` IN ('restore', 'restore-error')) AND (`lockss_status` = 'agreement') ORDER BY `id`";
         return $this->findEntities($sql);        
     }
 }
