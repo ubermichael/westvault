@@ -9,12 +9,15 @@
 
 namespace OCA\WestVault\Service;
 
+use Exception;
 use OC\Files\Node\Root;
 use OCA\WestVault\Db\DepositFileMapper;
 use OCA\WestVault\Service\SwordClient;
 use OCA\WestVault\Service\WestVaultConfig;
+use OCP\Files\NotFoundException;
 use OCP\IURLGenerator;
 use OCP\IUserManager;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Description of depositorservice
@@ -62,26 +65,29 @@ class StatusService {
         $this->manager = $manager;
     }
 
-    public function run($all = false) {
+    public function run($all = false, OutputInterface $output) {
         $deleted = false;
         $files = $this->mapper->findNotChecked($all);
+        $output->writeln("Checking status of " . count($files) . " deposits.", OutputInterface::VERBOSITY_VERBOSE);
         if (count($files) === 0) {
             return;
         }
         foreach ($files as $depositFile) {
             $user = $this->manager->get($depositFile->getUserId());
             $states = $this->client->statement($user, $depositFile->getPlnUrl());
+            $depositFile->setDateChecked(time());
+            $depositFile->setPlnStatus($states['pln']);
+            $depositFile->setLockssStatus($states['lockss']);            
+            $this->mapper->update($depositFile);
             if(($states['lockss'] === 'agreement') && ($this->config->getUserValue('pln_user_cleanup', $user->getUID(), 'b:0') === 'cleanup')) {
                 try {
                     $file = $this->root->get($depositFile->getPath());
                     $file->delete();
                     $deleted = true;
-                } catch (\Exception $e) {
-                    print $e->getMessage() . "\n";
+                } catch (NotFoundException $e) {
+                    $output->writeln("File not found: {$e->getMessage()}");
                 }
             }
-            $depositFile->setDateChecked(time());
-            $this->mapper->update($depositFile);
         }
         if($deleted) {
             print "Remember to run files:scan --all next.\n";
