@@ -35,7 +35,7 @@ class Restore extends Command {
         $app = new Application('westvault');
         $container = $app->getContainer();
         $restorer = $container->query('RestoreService');
-        $restorer->run();
+        $restorer->run($output);
     }
 
 }
