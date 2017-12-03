@@ -86,6 +86,17 @@ class UserHooks {
     public function userRegister(IUser $user) {
         $this->config->setUserValue('pln_user_uuid', $user->getUID(), Uuid::uuid4()->toString());
     }
+    
+    private function hash($algorithm, Node $file) {
+        $context = hash_init($algorithm);
+        $handle = fopen($this->config->getSystemValue('datadirectory') . $file->getPath(), 'r');
+        while(($data = fread($handle, 64 * 1024))) {
+            hash_update($context, $data);
+        }
+        $hash = hash_final($context);
+        fclose($handle); 
+        return $hash;        
+    }
 
     /**
      * Callback for the post file create hook.
@@ -124,7 +135,7 @@ class UserHooks {
         $depositFile->setUuid(Uuid::uuid4());
         $depositFile->setPath($file->getPath());
         $depositFile->setChecksumType($checksumType);
-        $depositFile->setChecksumValue(hash($checksumType, $file->getContent()));
+        $depositFile->setChecksumValue($this->hash($checksumType, $file));
         $depositFile->setDateSent(null);
         $depositFile->setDateChecked(null);
         $this->mapper->insert($depositFile);

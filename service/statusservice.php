@@ -63,6 +63,7 @@ class StatusService {
     }
 
     public function run($all = false) {
+        $deleted = false;
         $files = $this->mapper->findNotChecked($all);
         if (count($files) === 0) {
             return;
@@ -70,19 +71,20 @@ class StatusService {
         foreach ($files as $depositFile) {
             $user = $this->manager->get($depositFile->getUserId());
             $states = $this->client->statement($user, $depositFile->getPlnUrl());
-            $depositFile->setPlnStatus($states['pln']);
-            $depositFile->setLockssStatus($states['lockss']);
-            if($states['lockss'] === 'agreement' && $this->config->getUserValue('pln_user_cleanup', $user->getUID(), 'b:0') === 'cleanup') {
+            if(($states['lockss'] === 'agreement') && ($this->config->getUserValue('pln_user_cleanup', $user->getUID(), 'b:0') === 'cleanup')) {
                 try {
                     $file = $this->root->get($depositFile->getPath());
                     $file->delete();
+                    $deleted = true;
                 } catch (\Exception $e) {
-                    print get_class($e) . $e->getMessage() . "\n";
-                    print $e->getTraceAsString() . "\n";
+                    print $e->getMessage() . "\n";
                 }
             }
             $depositFile->setDateChecked(time());
             $this->mapper->update($depositFile);
+        }
+        if($deleted) {
+            print "Remember to run files:scan --all next.\n";
         }
     }
 }
