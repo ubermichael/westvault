@@ -17,6 +17,7 @@ require_once __DIR__ . '/autoload.php';
 $app = new Application('westvault');
 $container = $app->getContainer();
 $container->query('UserHooks')->register();
+$container->query('FileHooks')->register();
 
 $container->query('OCP\INavigationManager')->add(function () use ($container) {
     $urlGenerator = $container->query('OCP\IURLGenerator');
