@@ -16,7 +16,7 @@
             data: formData,
             success: function (responseData, status, jqXhr) {
                 alert(responseData.message);
-                if(callback) {
+                if (callback) {
                     callback(responseData);
                 }
             },
@@ -27,48 +27,48 @@
     }
 
     $(document).ready(function () {
-        $(".restore").click(function(e){            
+        $(".restore").click(function (e) {
             e.preventDefault();
             var $this = $(this);
             var url = OC.generateUrl('/apps/westvault/restore');
             var data = {
                 uuid: $(this).data('uuid'),
             };
-            postConfig(url, data, function(data){
+            postConfig(url, data, function (data) {
                 $this.parent().parent().find('.pln-status').text('restore');
             });
         });
-        
+
         $("#user_save").click(function (e) {
             e.preventDefault();
             var url = OC.generateUrl('/apps/westvault/config/save-user');
             var formData = $("#westvault_user").serialize();
             postConfig(url, formData);
         });
-        
+
         $("#site_save").click(function (e) {
             e.preventDefault();
             var url = OC.generateUrl('/apps/westvault/config/save-site');
             var formData = $("#westvault_site").serialize();
             postConfig(url, formData);
         });
-        $("#terms_agree").click(function(e){
+        $("#terms_agree").click(function (e) {
             e.preventDefault();
             var url = OC.generateUrl('/apps/westvault/config/save-agreement');
             var formData = $("#westvault_terms").serialize();
             postConfig(url, formData);
         });
-        
-        $("#pln_terms_refresh").click(function(e){
+
+        $("#pln_terms_refresh").click(function (e) {
             e.preventDefault();
             var url = OC.generateUrl('/apps/westvault/config/refresh');
             console.log("starting terms refresh.");
             $.ajax(url, {
                 method: 'POST',
-                success: function (responseData, status, jqXhr) {                    
+                success: function (responseData, status, jqXhr) {
                     alert("The terms have been updated.");
                     var $ol = $("#westvault_terms blockquote").html('<ol></ol>');
-                    responseData.terms.forEach(function(term) {
+                    responseData.terms.forEach(function (term) {
                         $ol.append("<li>" + term['text'] + "<br><em>updated " + term['updated'] + "</li>");
                     });
                 },

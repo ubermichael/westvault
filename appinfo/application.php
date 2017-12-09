@@ -71,9 +71,9 @@ class Application extends App {
                     $c->query('AppName')
             );
         });
-        
+
         // Navigation manager.
-        $container->registerService('WestVaultNavigation', function($c){
+        $container->registerService('WestVaultNavigation', function($c) {
             return new Navigation($c->query('OCP\IURLGenerator'));
         });
 
@@ -90,7 +90,7 @@ class Application extends App {
                     
             );
         });
-        
+
         // Manage plugin configuration.
         $container->registerService('ConfigController', function($c) {
             return new ConfigController(
@@ -106,26 +106,27 @@ class Application extends App {
         });
 
         // Sword Client interacts with the staging server.
-        $container->registerService('SwordClient', function($c){
+        $container->registerService('SwordClient', function($c) {
             return new SwordClient(
                 $c->query('WestVaultConfig'),
                 $c->query('Logger')
             );
         });
-        
+
         // Map deposit files from the database.
-        $container->registerService('DepositFileMapper', function($c){
+        $container->registerService('DepositFileMapper', function($c) {
             return new DepositFileMapper($c->query('ServerContainer')->getDb());
         });
-        
-        // Hooks and events management. 
+
+        // Hooks and events management for users. 
         $container->registerService('UserHooks', function($c) {
             return new UserHooks(
                     $c->query('ServerContainer')->getUserManager(),
                     $c->query('WestVaultConfig')
             );
         });
-        
+
+        // Hooks for file management.
         $container->registerService('FileHooks', function($c) {
             return new FileHooks(
                     $c->query('ServerContainer')->getUserManager(),
@@ -135,8 +136,9 @@ class Application extends App {
                     $c->query('Logger')            
             );
         });
-        
-        $container->registerService('DepositService', function($c){
+
+        // Depositor service sends things to the staging server.
+        $container->registerService('DepositService', function($c) {
             return new DepositorService(
                     $c->query('WestVaultConfig'),
                     $c->query('SwordClient'),
@@ -146,8 +148,9 @@ class Application extends App {
                     $c->query('ServerContainer')->getUserManager()
             );
         });
-        
-        $container->registerService('RestoreService', function($c){
+
+        // Restore service pulls things from the staging server.
+        $container->registerService('RestoreService', function($c) {
             return new RestoreService(
                     $c->query('WestVaultConfig'),
                     $c->query('SwordClient'),
@@ -157,8 +160,9 @@ class Application extends App {
                     $c->query('ServerContainer')->getUserManager()
             );
         });
-        
-        $container->registerService('StatusService', function($c){
+
+        // Status service figures out how the processing is going.
+        $container->registerService('StatusService', function($c) {
             return new StatusService(
                     $c->query('WestVaultConfig'),
                     $c->query('SwordClient'),

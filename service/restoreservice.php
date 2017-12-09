@@ -20,7 +20,7 @@ use OCP\IUserManager;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Description of depositorservice
+ * Service to restore content from the staging server.
  *
  * @author Michael Joyce <ubermichael@gmail.com>
  */
@@ -56,6 +56,16 @@ class RestoreService {
      */
     private $manager;
 
+    /**
+     * Construct the service.
+     * 
+     * @param WestVaultConfig $config
+     * @param SwordClient $client
+     * @param Root $root
+     * @param DepositFileMapper $mapper
+     * @param IURLGenerator $generator
+     * @param IUserManager $manager
+     */
     public function __construct(WestVaultConfig $config, SwordClient $client, Root $root, DepositFileMapper $mapper, IURLGenerator $generator, IUserManager $manager) {
         $this->config = $config;
         $this->client = $client;
@@ -65,6 +75,14 @@ class RestoreService {
         $this->manager = $manager;
     }
     
+    /**
+     * Fetch a deposit from the staging server and store it in a temporary file.
+     * Returns the path to the temporary file.
+     * 
+     * @param \OCA\WestVault\Service\DepositFile $depositFile
+     * @param OutputInterface $output
+     * @return String
+     */
     public function fetchFile(DepositFile $depositFile, OutputInterface $output) {
         $output->writeln($depositFile->filename(), OutputInterface::VERBOSITY_VERBOSE);
         $user = $this->manager->get($depositFile->getUserId());

@@ -1,6 +1,6 @@
 <?php
 
-/* 
+/*
  *  This file is licensed under the MIT License version 3 or
  *  later. See the LICENSE file for details.
  *
@@ -15,7 +15,7 @@ use OCP\IConfig;
  * Configuration manager for the plugin.
  */
 class WestVaultConfig {
-    
+
     /**
      * @var IConfig
      */
@@ -25,7 +25,7 @@ class WestVaultConfig {
      * @var string
      */
     private $appName;
-    
+
     /**
      * Build the config manager.
      * 
@@ -58,7 +58,7 @@ class WestVaultConfig {
     public function setSystemValue($key, $value) {
         $this->config->setSystemValue($key, $value);
     }
-    
+
     /**
      * App values are stored in the database. Examples include the 
      * Terms of Service and the last TOS check.
@@ -91,7 +91,7 @@ class WestVaultConfig {
     public function getUserValue($key, $userId, $default = '') {
         return $this->config->getUserValue($userId, $this->appName, $key, $default);
     }
-    
+
     /**
      * Get the ignored file patterns for a user.
      * 
@@ -99,13 +99,12 @@ class WestVaultConfig {
      */
     public function getIgnoredPatterns($userId) {
         $regexes = [];
-        $ignoreStrings = 
-                $this->config->getUserValue($userId, $this->appName, 'pln_user_ignore', '') . 
+        $ignoreStrings = $this->config->getUserValue($userId, $this->appName, 'pln_user_ignore', '') .
                 "\n" .
                 $this->config->getAppValue($this->appName, 'pln_site_ignore', $userId) .
                 "\n";
         $ignorePatterns = explode("\n", $ignoreStrings);
-        foreach($ignorePatterns as $pattern) {
+        foreach ($ignorePatterns as $pattern) {
             $regexes[] = str_replace(['.', '*'], ['\\.', '.*'], trim($pattern));
         }
         return array_filter($regexes);
@@ -119,10 +118,10 @@ class WestVaultConfig {
      */
     public function setUserValue($key, $userId, $value) {
         // never change the uuid.
-        if($key === 'uuid' && $this->config->getUserValue($userId, 'uuid', null) !== null) {
+        if ($key === 'uuid' && $this->config->getUserValue($userId, 'uuid', null) !== null) {
             return;
         }
         $this->config->setUserValue($userId, $this->appName, $key, $value);
     }
-       
+
 }

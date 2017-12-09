@@ -56,5 +56,6 @@ class UserHooks {
      */
     public function userRegister(IUser $user) {
         $this->config->setUserValue('pln_user_uuid', $user->getUID(), Uuid::uuid4()->toString());
-    }    
+    }
+
 }

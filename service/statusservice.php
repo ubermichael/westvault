@@ -20,7 +20,7 @@ use OCP\IUserManager;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Description of depositorservice
+ * Service to check the status of deposits in the staging server.
  *
  * @author Michael Joyce <ubermichael@gmail.com>
  */
@@ -56,6 +56,16 @@ class StatusService {
      */
     private $manager;
 
+    /**
+     * Build the service.
+     * 
+     * @param WestVaultConfig $config
+     * @param SwordClient $client
+     * @param Root $root
+     * @param DepositFileMapper $mapper
+     * @param IURLGenerator $generator
+     * @param IUserManager $manager
+     */
     public function __construct(WestVaultConfig $config, SwordClient $client, Root $root, DepositFileMapper $mapper, IURLGenerator $generator, IUserManager $manager) {
         $this->config = $config;
         $this->client = $client;
@@ -65,6 +75,15 @@ class StatusService {
         $this->manager = $manager;
     }
 
+    /**
+     * Run the service.
+     * 
+     * @todo Refactor this a bit.
+     * 
+     * @param type $all
+     * @param OutputInterface $output
+     * @return null
+     */
     public function run($all = false, OutputInterface $output) {
         $deleted = false;
         $files = $this->mapper->findNotChecked($all);
@@ -88,9 +107,6 @@ class StatusService {
                     $output->writeln("File not found: {$e->getMessage()}");
                 }
             }
-        }
-        if($deleted) {
-            print "Remember to run files:scan --all next.\n";
         }
     }
 }

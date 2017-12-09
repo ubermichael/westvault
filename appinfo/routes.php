@@ -9,7 +9,9 @@
  * @author Michael Joyce <ubermichael@gmail.com>
  * @copyright Michael Joyce 2017
  */
+
 namespace OCA\WestVault\AppInfo;
+
 /**
  * Create your routes in here. The name is the lowercase name of the controller
  * without the controller part, the stuff after the hash is the method.
@@ -21,11 +23,10 @@ namespace OCA\WestVault\AppInfo;
 $application = new Application();
 $application->registerRoutes($this, array(
     'routes' => [
-        ['name' => 'page#index', 'url' => '/', 'verb' => 'GET'],        
+        ['name' => 'page#index', 'url' => '/', 'verb' => 'GET'],
         ['name' => 'page#restore', 'url' => '/restore', 'verb' => 'POST'],
         ['name' => 'page#fetch', 'url' => '/fetch/{uuid}', 'verb' => 'GET'],
         ['name' => 'page#fetchHead', 'url' => '/fetch/{uuid}', 'method' => 'HEAD'],
-        
         ['name' => 'config#index', 'url' => '/config', 'verb' => 'GET'],
         ['name' => 'config#saveUser', 'url' => '/config/save-user', 'verb' => 'POST'],
         ['name' => 'config#saveSite', 'url' => '/config/save-site', 'verb' => 'POST'],

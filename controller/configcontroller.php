@@ -53,12 +53,12 @@ class ConfigController extends Controller {
      * @var SwordClient
      */
     private $client;
-    
+
     /**
      * @var Root
      */
     private $root;
-    
+
     /**
      * Build the controller.
      * 
@@ -94,10 +94,8 @@ class ConfigController extends Controller {
             'navigation' => $this->navigation->linkList(),
             'user' => $this->user,
             'isAdmin' => $this->groupManager->isAdmin($this->user->getUID()),
-            
             'pln_accepting' => $this->client->isAccepting($this->user),
             'pln_message' => $this->client->getMessage($this->user),
-            
             'pln_site_ignore' => $this->config->getAppValue('pln_site_ignore'),
             'pln_site_checksum_type' => $this->config->getAppValue('pln_site_checksum_type', 'sha1'),
             'pln_site_url' => $this->config->getSystemValue('pln_site_url'),
@@ -132,7 +130,7 @@ class ConfigController extends Controller {
             $newTerms = $this->client->getTermsOfUse($this->user);
             $updated = $this->client->getTermsUpdated($this->user);
             $result = 'The terms of service have not changed since the last time they were checked.';
-            if($updated !== $this->config->getUserValue('pln_terms_of_use_updated', $this->user->getUID(), '')) {
+            if ($updated !== $this->config->getUserValue('pln_terms_of_use_updated', $this->user->getUID(), '')) {
                 $result = 'The terms of service have been updated.';
                 $this->config->setUserValue('pln_terms_of_use', $this->user->getUID(), serialize($newTerms));
                 $this->config->setUserValue('pln_terms_of_use_updated', $this->user->getUID(), $updated);
@@ -195,19 +193,19 @@ class ConfigController extends Controller {
         }
     }
 
-	/**
-	 * Check that a user folder exists and create it if necessary.
-	 * 
-	 * @param string $name
-	 */
-	protected function checkUserFolder($name) {
-		$userFolder = $this->root->getUserFolder($this->user->getUID());
-		try {
-			$userFolder->get($name);
-		} catch (NotFoundException $e) {
-			$userFolder->newFolder($name);
-		}
-	}
+    /**
+     * Check that a user folder exists and create it if necessary.
+     * 
+     * @param string $name
+     */
+    protected function checkUserFolder($name) {
+        $userFolder = $this->root->getUserFolder($this->user->getUID());
+        try {
+            $userFolder->get($name);
+        } catch (NotFoundException $e) {
+            $userFolder->newFolder($name);
+        }
+    }
 
     /**
      * Save the user settings and create the preservation and restoration 

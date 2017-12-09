@@ -22,7 +22,7 @@ use OCP\IUser;
  * @author Michael Joyce <ubermichael@gmail.com>
  */
 class DepositFileMapper extends Mapper {
-    
+
     /**
      * DB table name for the mapper - must not include the prefix for some 
      * reason.
@@ -33,7 +33,7 @@ class DepositFileMapper extends Mapper {
      * Prefixed version of the database table, for the queries. I dunno.
      */
     const TBL = '*PREFIX*westvault_depositfiles';
-    
+
     /**
      * Build the mapper.
      * 
@@ -42,7 +42,7 @@ class DepositFileMapper extends Mapper {
     public function __construct(IDBConnection $db) {
         parent::__construct($db, self::TABLE);
     }
-    
+
     /**
      * Find the DepositFile with the given ID.
      * 
@@ -64,7 +64,7 @@ class DepositFileMapper extends Mapper {
         $sql = "SELECT * FROM " . self::TBL . " WHERE `file_id` = :file_id";
         return $this->findEntity($sql, array('file_id' => $fileId));
     }
-    
+
     /**
      * Find a DepositFile corresponding a UUID. May return null.
      * 
@@ -75,7 +75,7 @@ class DepositFileMapper extends Mapper {
         $sql = "SELECT * FROM " . self::TBL . " WHERE `uuid` = :uuid";
         return $this->findEntity($sql, array('uuid' => $uuid));
     }
-    
+
     /**
      * Find a DepositFile corresponding a path. May return null.
      * 
@@ -88,11 +88,11 @@ class DepositFileMapper extends Mapper {
             return $this->findEntity($sql, array('path' => $path));
         } catch (DoesNotExistException $e) {
             return null;
-        } catch(MultipleObjectsReturnedException $e) {
+        } catch (MultipleObjectsReturnedException $e) {
             return null;
         }
     }
-    
+
     /**
      * Find deposit files for a user.
      * 
@@ -101,7 +101,7 @@ class DepositFileMapper extends Mapper {
      */
     public function findByUser(IUser $user) {
         $sql = "SELECT * FROM " . self::TBL . " WHERE `user_id` = :user_id";
-        return $this->findEntities($sql, array('user_id' => $user->getUID()));        
+        return $this->findEntities($sql, array('user_id' => $user->getUID()));
     }
 
     /**
@@ -110,26 +110,27 @@ class DepositFileMapper extends Mapper {
      */
     public function findNotDeposited() {
         $sql = "SELECT * FROM " . self::TBL . " WHERE `date_sent` IS NULL ORDER BY `id`";
-        return $this->findEntities($sql);        
+        return $this->findEntities($sql);
     }
-    
+
     /**
      * @return DepositFile[]
      */
     public function findNotChecked($all = false) {
-        if($all) {
+        if ($all) {
             $sql = "SELECT * FROM " . self::TBL . " WHERE (`pln_status` is not null) AND (`lockss_status` is null OR `lockss_status` <> 'agreement') ORDER BY `id`";
         } else {
             $sql = "SELECT * FROM " . self::TBL . " WHERE (`pln_status` is not null) AND (`lockss_status` is null OR `lockss_status` <> 'agreement') AND (`date_checked` IS NULL OR `date_checked` < :past) ORDER BY `id`";
-        }   
-        return $this->findEntities($sql, array('past' => time() - ( 24 * 60 * 60 )));        
+        }
+        return $this->findEntities($sql, array('past' => time() - ( 24 * 60 * 60 )));
     }
-    
+
     /**
      * @return DepositFile[]
      */
     public function findRestoreQueue() {
         $sql = "SELECT * FROM " . self::TBL . " WHERE (`pln_status` IN ('restore', 'restore-error')) AND (`lockss_status` = 'agreement') ORDER BY `id`";
-        return $this->findEntities($sql);        
+        return $this->findEntities($sql);
     }
+
 }

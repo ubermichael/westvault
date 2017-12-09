@@ -94,15 +94,15 @@ class PageController extends Controller {
      * @NoCSRFRequired
      */
     public function restore() {
-        $uuid = $this->request->getParam('uuid', 0);  
+        $uuid = $this->request->getParam('uuid', 0);
         $depositFile = $this->mapper->findByUuid($uuid);
-        if(! $depositFile) {
+        if (!$depositFile) {
             return new DataResponse([
                 'status' => 'error',
                 'message' => 'The requested file does not exist.',
             ]);
         }
-        if($this->user->getUID() !== $depositFile->getUserId()) {
+        if ($this->user->getUID() !== $depositFile->getUserId()) {
             return new DataResponse([
                 'status' => 'error',
                 'message' => 'Only the owner of a deposit may initiate restore.',
@@ -112,13 +112,8 @@ class PageController extends Controller {
         $this->mapper->update($depositFile);
         return new DataResponse(array(
             'status' => 'success',
-            'message' => "The deposit has been added to the restore queue.",            
+            'message' => "The deposit has been added to the restore queue.",
         ));
-//      $this->user
-//            return new DataResponse(array(
-//                'status' => 'failure',
-//                'result' => 'Error refreshing the terms of use: ' . $ex->getMessage() . ' at ' . $ex->getFile() . '#' . $ex->getLine(),
-//            ));
     }
 
     /**
