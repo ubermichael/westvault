@@ -13,6 +13,7 @@ use OCA\WestVault\Controller\ConfigController;
 use OCA\WestVault\Controller\PageController;
 use OCA\WestVault\Db\DepositFileMapper;
 use OCA\WestVault\Hooks\UserHooks;
+use OCA\WestVault\Hooks\FileHooks;
 use OCA\WestVault\Service\DepositorService;
 use OCA\WestVault\Service\Navigation;
 use OCA\WestVault\Service\RestoreService;
@@ -118,14 +119,20 @@ class Application extends App {
         });
         
         // Hooks and events management. 
-        // @todo UserHooks should be called HooksManager or something.
         $container->registerService('UserHooks', function($c) {
             return new UserHooks(
+                    $c->query('ServerContainer')->getUserManager(),
+                    $c->query('WestVaultConfig')
+            );
+        });
+        
+        $container->registerService('FileHooks', function($c) {
+            return new FileHooks(
                     $c->query('ServerContainer')->getUserManager(),
                     $c->query('WestVaultConfig'),        
                     $c->query('ServerContainer')->getRootFolder(),
                     $c->query('DepositFileMapper'),
-                    $c->query('Logger')
+                    $c->query('Logger')            
             );
         });
         

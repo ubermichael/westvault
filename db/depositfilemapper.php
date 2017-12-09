@@ -9,7 +9,9 @@
 
 namespace OCA\WestVault\Db;
 
+use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\AppFramework\Db\Mapper;
+use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\IDBConnection;
 use OCP\IUser;
 
@@ -78,11 +80,17 @@ class DepositFileMapper extends Mapper {
      * Find a DepositFile corresponding a path. May return null.
      * 
      * @param string $path
-     * @return DepositFile|ull
+     * @return DepositFile|null
      */
     public function findByPath($path) {
         $sql = "SELECT * FROM " . self::TBL . " WHERE `path` = :path";
-        return $this->findEntity($sql, array('path' => $path));        
+        try {
+            return $this->findEntity($sql, array('path' => $path));
+        } catch (DoesNotExistException $e) {
+            return null;
+        } catch(MultipleObjectsReturnedException $e) {
+            return null;
+        }
     }
     
     /**
