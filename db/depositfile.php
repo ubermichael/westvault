@@ -71,6 +71,11 @@ class DepositFile extends Entity {
     /**
      * @var int
      */
+    protected $dateUploaded;
+
+    /**
+     * @var int
+     */
     protected $dateSent;
 
     /**

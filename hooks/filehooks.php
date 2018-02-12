@@ -135,6 +135,7 @@ class FileHooks {
         $depositFile->setPath($file->getPath());
         $depositFile->setChecksumType($checksumType);
         $depositFile->setChecksumValue($this->hash($checksumType, $file));
+        $depositFile->setDateUploaded(time());
         $depositFile->setDateSent(null);
         $depositFile->setDateChecked(null);
         $this->mapper->insert($depositFile);
@@ -185,9 +186,9 @@ class FileHooks {
             $this->mapper->delete($depositFile);
             return;
         }
-
-
+        
         $depositFile->setPath($target->getPath());
+        $depositFile->setDateUploaded(time());        
         $this->mapper->update($depositFile);
     }
 

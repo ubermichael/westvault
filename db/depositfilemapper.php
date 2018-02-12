@@ -109,8 +109,8 @@ class DepositFileMapper extends Mapper {
      * @return DepositFile[]
      */
     public function findNotDeposited() {
-        $sql = "SELECT * FROM " . self::TBL . " WHERE `date_sent` IS NULL ORDER BY `id`";
-        return $this->findEntities($sql);
+        $sql = "SELECT * FROM " . self::TBL . " WHERE (`date_sent` IS NULL) AND (`date_uploaded` < :past) ORDER BY `id`";
+        return $this->findEntities($sql, array('past' => time() - ( 24 * 60 * 60 )));
     }
 
     /**
