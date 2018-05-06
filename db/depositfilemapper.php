@@ -24,7 +24,7 @@ use OCP\IUser;
 class DepositFileMapper extends Mapper {
 
     /**
-     * DB table name for the mapper - must not include the prefix for some 
+     * DB table name for the mapper - must not include the prefix for some
      * reason.
      */
     const TABLE = 'westvault_depositfiles';
@@ -35,8 +35,14 @@ class DepositFileMapper extends Mapper {
     const TBL = '*PREFIX*westvault_depositfiles';
 
     /**
+     * Number of seconds to hold a deposit before sending it off to the staging
+     * server.
+     */
+    const WAIT = 0; //24 * 60 * 60;
+
+    /**
      * Build the mapper.
-     * 
+     *
      * @param IDBConnection $db
      */
     public function __construct(IDBConnection $db) {
@@ -45,7 +51,7 @@ class DepositFileMapper extends Mapper {
 
     /**
      * Find the DepositFile with the given ID.
-     * 
+     *
      * @param string $id
      * @return DepositFile
      */
@@ -56,7 +62,7 @@ class DepositFileMapper extends Mapper {
 
     /**
      * Find a DepositFile corresponding to the fileId. May return null.
-     * 
+     *
      * @param type $fileId
      * @return DepositFile|null
      */
@@ -67,7 +73,7 @@ class DepositFileMapper extends Mapper {
 
     /**
      * Find a DepositFile corresponding a UUID. May return null.
-     * 
+     *
      * @param string $uuid
      * @return DepositFile|ull
      */
@@ -78,7 +84,7 @@ class DepositFileMapper extends Mapper {
 
     /**
      * Find a DepositFile corresponding a path. May return null.
-     * 
+     *
      * @param string $path
      * @return DepositFile|null
      */
@@ -95,7 +101,7 @@ class DepositFileMapper extends Mapper {
 
     /**
      * Find deposit files for a user.
-     * 
+     *
      * @param IUser $user
      * @return DepositFile[]
      */
@@ -110,7 +116,7 @@ class DepositFileMapper extends Mapper {
      */
     public function findNotDeposited() {
         $sql = "SELECT * FROM " . self::TBL . " WHERE (`date_sent` IS NULL) AND (`date_uploaded` < :past) ORDER BY `id`";
-        return $this->findEntities($sql, array('past' => time() - ( 24 * 60 * 60 )));
+        return $this->findEntities($sql, array('past' => time() - ( self::WAIT )));
     }
 
     /**
@@ -122,7 +128,7 @@ class DepositFileMapper extends Mapper {
         } else {
             $sql = "SELECT * FROM " . self::TBL . " WHERE (`pln_status` is not null) AND (`lockss_status` is null OR `lockss_status` <> 'agreement') AND (`date_checked` IS NULL OR `date_checked` < :past) ORDER BY `id`";
         }
-        return $this->findEntities($sql, array('past' => time() - ( 24 * 60 * 60 )));
+        return $this->findEntities($sql, array('past' => time() - ( self::WAIT )));
     }
 
     /**

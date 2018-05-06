@@ -24,14 +24,14 @@ use OCP\AppFramework\App;
 use OCP\IContainer;
 
 /**
- * Application is the central entry point for the plugin. It defines all the 
+ * Application is the central entry point for the plugin. It defines all the
  * container elements.
  */
 class Application extends App {
 
     /**
      * Build the application and populate the container services.
-     * 
+     *
      * @param string $appName
      * @param array $urlParams
      */
@@ -80,23 +80,23 @@ class Application extends App {
         // Page controller for non-config stuff.
         $container->registerService('PageController', function($c) {
             return new PageController(
-                    $c->query('AppName'), 
-                    $c->query('Request'), 
-                    $c->query('User'), 
+                    $c->query('AppName'),
+                    $c->query('Request'),
+                    $c->query('User'),
                     $c->query('WestVaultNavigation'),
                     $c->query('WestVaultConfig'),
                     $c->query('DepositFileMapper'),
                     $c->query('ServerContainer')->getRootFolder()
-                    
+
             );
         });
 
         // Manage plugin configuration.
         $container->registerService('ConfigController', function($c) {
             return new ConfigController(
-                    $c->query('AppName'), 
-                    $c->query('Request'), 
-                    $c->query('User'), 
+                    $c->query('AppName'),
+                    $c->query('Request'),
+                    $c->query('User'),
                     $c->query('GroupManager'),
                     $c->query('WestVaultConfig'),
                     $c->query('WestVaultNavigation'),
@@ -118,7 +118,7 @@ class Application extends App {
             return new DepositFileMapper($c->query('ServerContainer')->getDb());
         });
 
-        // Hooks and events management for users. 
+        // Hooks and events management for users.
         $container->registerService('UserHooks', function($c) {
             return new UserHooks(
                     $c->query('ServerContainer')->getUserManager(),
@@ -130,10 +130,10 @@ class Application extends App {
         $container->registerService('FileHooks', function($c) {
             return new FileHooks(
                     $c->query('ServerContainer')->getUserManager(),
-                    $c->query('WestVaultConfig'),        
+                    $c->query('WestVaultConfig'),
                     $c->query('ServerContainer')->getRootFolder(),
                     $c->query('DepositFileMapper'),
-                    $c->query('Logger')            
+                    $c->query('Logger')
             );
         });
 
@@ -145,7 +145,8 @@ class Application extends App {
                     $c->query('ServerContainer')->getRootFolder(),
                     $c->query('DepositFileMapper'),
                     $c->query('OCP\IURLGenerator'),
-                    $c->query('ServerContainer')->getUserManager()
+                    $c->query('ServerContainer')->getUserManager(),
+                    $c->query('ServerContainer')->getGroupManager()
             );
         });
 
