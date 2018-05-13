@@ -121,8 +121,6 @@ class DepositorService {
         $entry->appendChild($atom->createElement('id', 'urn:uuid:' . $depositFile->getUuid()));
         $entry->appendChild($atom->createElement('updated', strftime("%FT%TZ")));
         $meta = $atom->createElementNS($ns->getNamespace('lom'), 'meta');
-        $meta->setAttribute('name', 'institution');
-        $meta->setAttribute('content', $groupKey);
         $entry->appendChild($meta);
         try {
             $file = $this->root->get($depositFile->getPath());
@@ -137,6 +135,7 @@ class DepositorService {
         $content->setAttribute('size', $file->getSize());
         $content->setAttribute('checksumType', $depositFile->getChecksumType());
         $content->setAttribute('checksumValue', $depositFile->getChecksumValue());
+        $content->setAttribute('institution', $groupKey);
         $entry->appendChild($content);
         print $atom->saveXML();
         return $atom;
