@@ -137,7 +137,6 @@ class DepositorService {
         $content->setAttribute('checksumValue', $depositFile->getChecksumValue());
         $content->setAttribute('institution', $groupKey);
         $entry->appendChild($content);
-        print $atom->saveXML();
         return $atom;
     }
 
