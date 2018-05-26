@@ -6,6 +6,7 @@
  *
  *  Copyright 2017 Michael Joyce <ubermichael@gmail.com>.
  */
+
 namespace OCA\WestVault\Db;
 
 use OCP\AppFramework\Db\Entity;
@@ -16,67 +17,72 @@ use OCP\AppFramework\Db\Entity;
  * @author Michael Joyce <ubermichael@gmail.com>
  */
 class DepositFile extends Entity {
-    
+
     /**
      * @var int
      */
     protected $fileId;
-    
+
     /**
      * @var string
      */
     protected $userId;
-    
+
     /**
      * @var string
      */
     protected $uuid;
-    
+
     /**
      * @var string
      */
     protected $path;
-    
+
     /**
      * @var string
      */
     protected $checksumType;
-    
+
     /**
      * @var string
      */
     protected $checksumValue;
-    
+
     /**
      * @var string
      */
     protected $plnStatus;
-    
+
     /**
      * @var string
      */
     protected $plnUrl;
-    
+
     /**
      * @var string
      */
     protected $lockssStatus;
-    
+
     /**
      * @var float
      */
     protected $agreement;
-    
+
+    /**
+     * @var int
+     */
+    protected $dateUploaded;
+
     /**
      * @var int
      */
     protected $dateSent;
-    
+
     /**
      * @var int
      */
     protected $dateChecked;
-    
+
     /**
      * Build a DepositFile. Does some very simple type hinting.
      */
@@ -84,7 +90,7 @@ class DepositFile extends Entity {
         $this->addType('fileId', 'int');
         $this->addType('agreement', 'float');
     }
-    
+
     /**
      * Check if the file has been sent to the PLN.
      * 
@@ -93,12 +99,12 @@ class DepositFile extends Entity {
     public function sent() {
         return $this->plnUrl !== null;
     }
-    
+
     /**
      * @return string
      */
     public function filename() {
         return basename($this->path);
     }
-    
+
 }

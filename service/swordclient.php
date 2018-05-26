@@ -177,10 +177,10 @@ class SwordClient {
      * @return array
      */
     public function createDeposit(IUser $user, DOMDocument $atom) {
-        if( ! $this->isAccepting($user)) {
+        if (!$this->isAccepting($user)) {
             throw new Exception("The staging server is not accepting deposits from {$user->getUID()}.");
         }
-        
+
         $colIri = $this->getColIri($user);
         $request = $this->httpClient->createRequest('POST', $colIri);
         $request->setBody(Stream::factory($atom->saveXML()));
@@ -195,8 +195,16 @@ class SwordClient {
         return array('location' => $location, 'xml' => $xml);
     }
 
+    /**
+     * Fetch the deposit statement from the server.
+     * 
+     * @param IUser $user
+     * @param string $plnUrl
+     * @return array
+     * @throws Exception
+     */
     public function statement(IUser $user, $plnUrl) {
-        if( ! $this->isAccepting($user)) {
+        if (!$this->isAccepting($user)) {
             throw new Exception("The staging server is not accepting deposits from {$user->getUID()}.");
         }
         $request = $this->httpClient->createRequest('GET', $plnUrl);
@@ -206,16 +214,25 @@ class SwordClient {
             throw new Exception("Cannot parse response document: " . implode("\n", libxml_get_errors()));
         }
         $this->ns->registerNamespaces($xml);
-        $plnStatus = (string)$xml->xpath('//atom:category[@label="Processing State"]/@term')[0];
-        $lockssStatus = (string)$xml->xpath('//atom:category[@label="PLN State"]/@term')[0];
+        $plnStatus = (string) $xml->xpath('//atom:category[@label="Processing State"]/@term')[0];
+        $lockssStatus = (string) $xml->xpath('//atom:category[@label="PLN State"]/@term')[0];
         return array(
             'pln' => $plnStatus,
             'lockss' => $lockssStatus,
         );
     }
 
+    /**
+     * Use the deposit statement to get the restoration URL from the 
+     * staging server.
+     * 
+     * @param IUser $user
+     * @param String $plnUrl
+     * @return string
+     * @throws Exception
+     */
     public function restoreUrl(IUser $user, $plnUrl) {
-        if( ! $this->isAccepting($user)) {
+        if (!$this->isAccepting($user)) {
             throw new Exception("The staging server is not accepting deposits from {$user->getUID()}.");
         }
         $request = $this->httpClient->createRequest('GET', $plnUrl);
@@ -226,10 +243,10 @@ class SwordClient {
         }
         $this->ns->registerNamespaces($xml);
         $elements = $xml->xpath('//sword:originalDeposit');
-        if( ! $elements || count($elements) < 1) {
+        if (!$elements || count($elements) < 1) {
             return null;
         }
-        if(count($elements) > 1) {
+        if (count($elements) > 1) {
             throw new Exception("Multiple content items in deposits are not supported.");
         }
         return $elements[0]['href'];

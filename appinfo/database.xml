@@ -76,6 +76,12 @@
                 <default>0.0</default>
             </field>
             <field>
+                <name>date_uploaded</name>
+                <type>integer</type>				
+                <notnull>true</notnull>
+                <length>8</length>
+            </field>
+            <field>
                 <name>date_sent</name>
                 <type>integer</type>				
                 <notnull>false</notnull>

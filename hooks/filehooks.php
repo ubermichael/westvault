@@ -54,7 +54,7 @@ class FileHooks {
     private $logger;
 
     /**
-     * Build an object with the user hooks.
+     * Build an object with the file hooks.
      * 
      * @param IUserManager $manager
      * @param WestVaultConfig $config
@@ -78,15 +78,24 @@ class FileHooks {
         $this->root->listen('\OC\Files', 'postRename', [$this, 'postRename']);
     }
 
+    /**
+     * Stream a file through a hashing function. 
+     * 
+     * @todo move this to a new service so it isn't duplicated everywhere.
+     * 
+     * @param type $algorithm
+     * @param Node $file
+     * @return string
+     */
     private function hash($algorithm, Node $file) {
         $context = hash_init($algorithm);
         $handle = fopen($this->config->getSystemValue('datadirectory') . $file->getPath(), 'r');
-        while(($data = fread($handle, 64 * 1024))) {
+        while (($data = fread($handle, 64 * 1024))) {
             hash_update($context, $data);
         }
         $hash = hash_final($context);
-        fclose($handle); 
-        return $hash;        
+        fclose($handle);
+        return $hash;
     }
 
     /**
@@ -115,9 +124,9 @@ class FileHooks {
         $userPath = $this->root->getUserFolder($uid)->getPath();
         $localPath = substr($file->getPath(), strlen($userPath) + 1);
 
-        if(substr($localPath, 0, strlen($watchFolder)) !== $watchFolder) {
+        if (substr($localPath, 0, strlen($watchFolder)) !== $watchFolder) {
             return;
-        }        
+        }
         $checksumType = $this->config->getAppValue('pln_site_checksum_type', 'sha1');
         $depositFile = new DepositFile();
         $depositFile->setFileId($file->getId());
@@ -126,6 +135,7 @@ class FileHooks {
         $depositFile->setPath($file->getPath());
         $depositFile->setChecksumType($checksumType);
         $depositFile->setChecksumValue($this->hash($checksumType, $file));
+        $depositFile->setDateUploaded(time());
         $depositFile->setDateSent(null);
         $depositFile->setDateChecked(null);
         $this->mapper->insert($depositFile);
@@ -139,27 +149,27 @@ class FileHooks {
      */
     public function postDelete(Node $file) {
         $depositFile = $this->mapper->findByPath($file->getPath());
-        if( ! $depositFile || $depositFile->sent()) {
+        if (!$depositFile || $depositFile->sent()) {
             return;
         }
         $this->mapper->delete($depositFile);
     }
-    
-    public function postRename (Node $source, Node $target) {
+
+    public function postRename(Node $source, Node $target) {
         $uid = $target->getOwner()->getUID();
         $depositFile = $this->mapper->findByPath($source->getPath());
-        
-        if( ! $depositFile) {
+
+        if (!$depositFile) {
             // Maybe moved into the preserved folder.
             $this->postCreate($target);
             return;
         }
-        
-        if($depositFile->sent()) {
+
+        if ($depositFile->sent()) {
             // already sent to the PLN. Not sure what to do here.
             return;
         }
-        
+
         foreach ($this->config->getIgnoredPatterns($uid) as $pattern) {
             if (preg_match("/^{$pattern}$/", $target->getName())) {
                 // moved to an ignored file name.
@@ -171,14 +181,14 @@ class FileHooks {
         $userPath = $this->root->getUserFolder($uid)->getPath();
         $localPath = substr($target->getPath(), strlen($userPath) + 1);
 
-        if(substr($localPath, 0, strlen($watchFolder)) !== $watchFolder) {
+        if (substr($localPath, 0, strlen($watchFolder)) !== $watchFolder) {
             // moved out of the lockss preserved folder.
             $this->mapper->delete($depositFile);
             return;
-        }        
-        
+        }
         
         $depositFile->setPath($target->getPath());
+        $depositFile->setDateUploaded(time());        
         $this->mapper->update($depositFile);
     }
 

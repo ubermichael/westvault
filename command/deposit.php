@@ -15,24 +15,35 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Description of depositortask
+ * Send content to the staging server.
  *
  * @author Michael Joyce <ubermichael@gmail.com>
  */
 class Deposit extends Command {
-    
+
+    /**
+     * Construct the command.
+     * 
+     * @param String $name
+     */
     public function configure() {
         parent::configure();
         $this->setName('westvault:deposit');
         $this->setDescription('Send deposits to the staging server.');
     }
 
+    /**
+     * Execute the command. Calls the DepositService to do the heavy lifting.
+     * 
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     */
     public function execute(InputInterface $input, OutputInterface $output) {
         $app = new Application('westvault');
         $container = $app->getContainer();
         try {
             $container->query('DepositService')->run();
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             $output->write($e->getMessage());
         }
     }
