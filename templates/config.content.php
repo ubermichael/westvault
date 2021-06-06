@@ -6,8 +6,7 @@
         <?php if ($_['pln_user_terms_checked']) { ?>
             <ol>
                 <?php foreach ($_['pln_user_terms'] as $term) { ?>
-                    <li><?php p($term['text']); ?><br>
-                        <em>updated <?php p($term['updated']); ?></em>
+                    <li><?php p($term['text']); ?><br> <em>updated <?php p($term['updated']); ?></em>
                     </li>
                 <?php } ?>
             </ol>
@@ -21,7 +20,7 @@
             Agreement date: <?php p($_['pln_user_agreed']->format('c')); ?>
         <?php } else { ?>
             <label for="pln_user_agreed">I agree to abide by the terms of use.</label>
-            <input type="checkbox" name="pln_user_agreed" id="pln_user_agreed" value="agree"/><br>
+            <input type="checkbox" name="pln_user_agreed" id="pln_user_agreed" value="agree" /><br>
             <button id="terms_agree">Save Agreement</button>
         <?php } ?>
     </p>
@@ -38,23 +37,23 @@
         <h3>Checksum Type</h3>
         <p>
             <input <?php if ('md5' === $_['pln_site_checksum_type']) {
-    echo "checked='checked'";
-} ?> type="radio" name="pln_site_checksum_type" id="pln_site_checksum_type_md5" value="md5">
-            <label for="pln_site_checksum_type_md5">MD5</label><br>
-            <em>Use message digest algorithm for calculating checksums.</em>
+                echo "checked='checked'";
+            } ?> type="radio" name="pln_site_checksum_type" id="pln_site_checksum_type_md5" value="md5">
+            <label for="pln_site_checksum_type_md5">MD5</label><br> <em>Use message digest algorithm for calculating
+                checksums.</em>
         </p>
         <p>
             <input <?php if ('sha1' === $_['pln_site_checksum_type']) {
-    echo "checked='checked'";
-} ?> type="radio" name="pln_site_checksum_type" id="pln_site_checksum_type_sha1" value="sha1">
-            <label for="pln_site_checksum_type_sha1">SHA-1</label><br>
-            <em>Use secure hash algorithm 1 for calculating checksums.</em>
-        </p>						
+                echo "checked='checked'";
+            } ?> type="radio" name="pln_site_checksum_type" id="pln_site_checksum_type_sha1" value="sha1">
+            <label for="pln_site_checksum_type_sha1">SHA-1</label><br> <em>Use secure hash algorithm 1 for calculating
+                checksums.</em>
+        </p>
         <p>
             <label>Staging server endpoint</label><br>
             <input value="<?php echo $_['pln_site_url']; ?>" type="url" name="pln_site_url" id="pln_site_url" /><br>
-            <em>The PLN staging server is where deposits are sent for processing. It probably
-                ends in `api/sword/2.0/sd-iri`.</em>
+            <em>The PLN staging server is where deposits are sent for processing. It probably ends in
+                `api/sword/2.0/sd-iri`.</em>
         </p>
         <button id="site_save">Save</button>
     </form>
@@ -73,7 +72,7 @@
         <blockquote>
             <?php if ('md5' === $_['pln_site_checksum_type']) { ?>
                 <b>MD5</b>: Use message digest algorithm for calculating checksums.
-            <?php } elseif ('sha1' === $_['pln_site_checksum_type']) { ?>
+            <?php } else if ('sha1' === $_['pln_site_checksum_type']) { ?>
                 <b>SHA-1</b>: Use secure hash algorithm 1 for calculating checksums.
             <?php } ?>
         </blockquote>
@@ -88,10 +87,10 @@
 <?php } ?>
 
 <form id="westvault_user">
-    <h3>User Settings</h3>    
+    <h3>User Settings</h3>
     <p>
         <label for="pln_user_email">Notification address</label><br>
-        <input value="<?php echo $_['pln_user_email']; ?>" type="email" name="pln_user_email" id="pln_user_email"/><br>
+        <input value="<?php echo $_['pln_user_email']; ?>" type="email" name="pln_user_email" id="pln_user_email" /><br>
         <em>Notification emails will be sent to this address.</em>
     </p>
     <p>
@@ -109,13 +108,14 @@
         <label>Restoration folder</label><br>
         <input value="<?php echo $_['pln_user_restored_folder']; ?>" type="text" name="pln_user_restored_folder" id="pln_user_restored_folder" /><br>
         <em>Preserved content will be restored to this folder as requested.</em>
-    </p>    
+    </p>
     <p>
         <label for="pln_user_cleanup">Remove completed deposits</label>
         <input <?php if ('cleanup' === $_['pln_user_cleanup']) {
-    echo 'checked="checked"';
-} ?> type="checkbox" name="pln_user_cleanup" id="pln_user_cleanup" value="cleanup"/><br>
-        <em>Remove files once they've been deposited to LOCKSS. Leave this unchecked if you would like to clean up the folder manually.</em>
+            echo 'checked="checked"';
+        } ?> type="checkbox" name="pln_user_cleanup" id="pln_user_cleanup" value="cleanup" /><br> <em>Remove files once
+            they've been deposited to LOCKSS. Leave this unchecked if you would like to clean up the folder
+            manually.</em>
     </p>
     <button id="user_save">Save Settings</button>
 </form>
