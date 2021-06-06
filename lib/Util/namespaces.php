@@ -37,12 +37,12 @@ class Namespaces {
      *
      * @param string $prefix
      *
-     * @return string
+     * @return ?string
      */
     public function getNamespace($prefix) {
         $constant = __CLASS__ . '::' . mb_strtoupper($prefix);
         if ( ! defined($constant)) {
-            return;
+            return null;
         }
 
         return constant($constant);

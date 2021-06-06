@@ -19,6 +19,7 @@ use OCA\WestVault\Db\DepositFileMapper;
 use OCA\WestVault\Util\Namespaces;
 use OCP\IGroupManager;
 use OCP\IURLGenerator;
+use OCP\IUser;
 use OCP\IUserManager;
 
 /**
@@ -78,7 +79,7 @@ class DepositorService {
     protected function generateDepositXml(IUser $user, DepositFile $depositFile) {
         $userGroups = $this->groupManager->getUserGroups($user);
         if (1 !== count($userGroups)) {
-            // throw a wibbily here.
+            throw new \Exception('User ' . $user->getDisplayName() . ' belongs to multiple groups. Cannot process deposits.');
         }
         // get the first group for the user.
         $groupKey = array_keys($userGroups)[0];

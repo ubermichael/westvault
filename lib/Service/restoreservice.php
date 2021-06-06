@@ -13,6 +13,7 @@ namespace OCA\WestVault\Service;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use OC\Files\Node\Root;
+use OCA\WestVault\Db\DepositFile;
 use OCA\WestVault\Db\DepositFileMapper;
 use OCP\IURLGenerator;
 use OCP\IUserManager;
@@ -70,9 +71,9 @@ class RestoreService {
      * Fetch a deposit from the staging server and store it in a temporary file.
      * Returns the path to the temporary file.
      *
-     * @param \OCA\WestVault\Service\DepositFile $depositFile
+     * @param DepositFile $depositFile
      *
-     * @return string
+     * @return ?string
      */
     public function fetchFile(DepositFile $depositFile, OutputInterface $output) {
         $output->writeln($depositFile->filename(), OutputInterface::VERBOSITY_VERBOSE);
@@ -90,14 +91,24 @@ class RestoreService {
             $depositFile->setPlnStatus('restore-error');
             $this->mapper->update($depositFile);
 
-            return;
+            return null;
         }
 
         return $filepath;
     }
 
+    /**
+     * @param DepositFile $depositFile
+     * @param string $filepath
+     * @param OutputInterface $output
+     *
+     * @return false|resource|null
+     */
     public function verifyChecksum(DepositFile $depositFile, $filepath, OutputInterface $output) {
         $handle = fopen($filepath, 'rb');
+        if( ! $handle) {
+            throw new \Exception("Cannot read " . $this->config->getSystemValue('datadirectory') . $file->getPath());
+        }
         $hashContext = hash_init($depositFile->getChecksumType());
         while ($data = fread($handle, 1024 * 64)) {
             hash_update($hashContext, $data);
@@ -108,13 +119,21 @@ class RestoreService {
             $output->writeln("Hash mismatch. Expected {$depositFile->getChecksumValue()} got {$hash}");
             $this->mapper->update($depositFile);
 
-            return;
+            return null;
         }
         rewind($handle);
 
         return $handle;
     }
 
+    /**
+     * @param DepositFile $depositFile
+     * @param resource $handle
+     * @param OutputInterface $output
+     *
+     * @throws \OCP\Files\NotPermittedException
+     * @throws \OC\User\NoUserException
+     */
     public function writeFile(DepositFile $depositFile, $handle, OutputInterface $output) : void {
         $user = $this->manager->get($depositFile->getUserId());
         $userFolder = $this->root->getUserFolder($depositFile->getUserId());
@@ -128,6 +147,12 @@ class RestoreService {
         }
     }
 
+    /**
+     * @param OutputInterface $output
+     *
+     * @throws \OCP\Files\NotPermittedException
+     * @throws \OC\User\NoUserException
+     */
     public function run(OutputInterface $output) : void {
         $files = $this->mapper->findRestoreQueue();
         $output->writeln('restoring ' . count($files), OutputInterface::VERBOSITY_VERBOSE);

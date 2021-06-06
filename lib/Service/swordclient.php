@@ -13,6 +13,7 @@ namespace OCA\WestVault\Service;
 use DOMDocument;
 use Exception;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Stream\Stream;
 use OCA\WestVault\Util\Namespaces;
 use OCP\ILogger;
@@ -26,7 +27,7 @@ use Ramsey\Uuid\Uuid;
  */
 class SwordClient {
     /**
-     * @var PlnConfig
+     * @var WestVaultConfig
      */
     private $config;
 
@@ -48,7 +49,7 @@ class SwordClient {
     /**
      * Build the client.
      *
-     * @param PlnConfig $config
+     * @param WestVaultConfig $config
      */
     public function __construct(WestVaultConfig $config, ILogger $logger) {
         $this->config = $config;
@@ -77,7 +78,7 @@ class SwordClient {
         ];
 
         $response = $client->get($sdIri, ['headers' => $headers]);
-        $xml = simplexml_load_string($response->getBody());
+        $xml = simplexml_load_string($response->getBody()->getContents());
         if (false === $xml) {
             throw new Exception('Cannot parse service document: ' . implode("\n", libxml_get_errors()));
         }
@@ -188,8 +189,8 @@ class SwordClient {
         $colIri = $this->getColIri($user);
         $request = $this->httpClient->createRequest('POST', $colIri);
         $request->setBody(Stream::factory($atom->saveXML()));
-        $response = $this->httpClient->send($request, []);
-        $xml = simplexml_load_string($response->getBody());
+        $response = $this->httpClient->send($request);
+        $xml = simplexml_load_string($response->getBody()->getContents());
         $location = $response->getHeader('Location');
         if (false === $xml) {
             throw new Exception('Cannot parse response document: ' . implode("\n", libxml_get_errors()));
@@ -213,8 +214,8 @@ class SwordClient {
             throw new Exception("The staging server is not accepting deposits from {$user->getUID()}.");
         }
         $request = $this->httpClient->createRequest('GET', $plnUrl);
-        $response = $this->httpClient->send($request, []);
-        $xml = simplexml_load_string($response->getBody());
+        $response = $this->httpClient->send($request);
+        $xml = simplexml_load_string($response->getBody()->getContents());
         if (false === $xml) {
             throw new Exception('Cannot parse response document: ' . implode("\n", libxml_get_errors()));
         }
@@ -234,24 +235,24 @@ class SwordClient {
      *
      * @param string $plnUrl
      *
-     * @throws Exception
+     * @return ?string
+     * @throws Exception|GuzzleException
      *
-     * @return string
      */
     public function restoreUrl(IUser $user, $plnUrl) {
         if ( ! $this->isAccepting($user)) {
             throw new Exception("The staging server is not accepting deposits from {$user->getUID()}.");
         }
         $request = $this->httpClient->createRequest('GET', $plnUrl);
-        $response = $this->httpClient->send($request, []);
-        $xml = simplexml_load_string($response->getBody());
+        $response = $this->httpClient->send($request);
+        $xml = simplexml_load_string($response->getBody()->getContents());
         if (false === $xml) {
             throw new Exception('Cannot parse response document: ' . implode("\n", libxml_get_errors()));
         }
         $this->ns->registerNamespaces($xml);
         $elements = $xml->xpath('//sword:originalDeposit');
         if ( ! $elements || count($elements) < 1) {
-            return;
+            return null;
         }
         if (count($elements) > 1) {
             throw new Exception('Multiple content items in deposits are not supported.');

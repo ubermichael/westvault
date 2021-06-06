@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace OCA\WestVault\Db;
 
 use OCP\AppFramework\Db\DoesNotExistException;
+use OCP\AppFramework\Db\Entity;
 use OCP\AppFramework\Db\Mapper;
 use OCP\AppFramework\Db\MultipleObjectsReturnedException;
 use OCP\IDBConnection;
@@ -38,13 +39,13 @@ class DepositFileMapper extends Mapper {
      * Number of seconds to hold a deposit before sending it off to the staging
      * server.
      */
-    public const WAIT = 0; //24 * 60 * 60;
+    public const WAIT = 24 * 60 * 60;
 
     /**
      * Build the mapper.
      */
     public function __construct(IDBConnection $db) {
-        parent::__construct($db, self::TABLE);
+        parent::__construct($db, self::TABLE, DepositFile::class);
     }
 
     /**
@@ -52,7 +53,7 @@ class DepositFileMapper extends Mapper {
      *
      * @param string $id
      *
-     * @return DepositFile
+     * @return Entity|DepositFile
      */
     public function find($id) {
         $sql = 'SELECT * FROM ' . self::TBL . ' WHERE `id` = :id';
@@ -63,9 +64,9 @@ class DepositFileMapper extends Mapper {
     /**
      * Find a DepositFile corresponding to the fileId. May return null.
      *
-     * @param type $fileId
+     * @param int $fileId
      *
-     * @return null|DepositFile
+     * @return Entity|DepositFile
      */
     public function findByFileId($fileId) {
         $sql = 'SELECT * FROM ' . self::TBL . ' WHERE `file_id` = :file_id';
@@ -77,8 +78,7 @@ class DepositFileMapper extends Mapper {
      * Find a DepositFile corresponding a UUID. May return null.
      *
      * @param string $uuid
-     *
-     * @return DepositFile|ull
+     * @return Entity|DepositFile|null
      */
     public function findByUuid($uuid) {
         $sql = 'SELECT * FROM ' . self::TBL . ' WHERE `uuid` = :uuid';
@@ -91,7 +91,7 @@ class DepositFileMapper extends Mapper {
      *
      * @param string $path
      *
-     * @return null|DepositFile
+     * @return Entity|DepositFile|null
      */
     public function findByPath($path) {
         $sql = 'SELECT * FROM ' . self::TBL . ' WHERE `path` = :path';
@@ -99,16 +99,16 @@ class DepositFileMapper extends Mapper {
         try {
             return $this->findEntity($sql, ['path' => $path]);
         } catch (DoesNotExistException $e) {
-            return;
+            return null;
         } catch (MultipleObjectsReturnedException $e) {
-            return;
+            return null;
         }
     }
 
     /**
      * Find deposit files for a user.
      *
-     * @return DepositFile[]
+     * @return Entity[]|DepositFile[]
      */
     public function findByUser(IUser $user) {
         $sql = 'SELECT * FROM ' . self::TBL . ' WHERE `user_id` = :user_id';
@@ -119,7 +119,7 @@ class DepositFileMapper extends Mapper {
     /**
      * Find files which have not been sent to the staging server yet.
      *
-     * @return DepositFile[]
+     * @return Entity[]|DepositFile[]
      */
     public function findNotDeposited() {
         $sql = 'SELECT * FROM ' . self::TBL . ' WHERE (`date_sent` IS NULL) AND (`date_uploaded` < :past) ORDER BY `id`';
@@ -128,9 +128,11 @@ class DepositFileMapper extends Mapper {
     }
 
     /**
-     * @param mixed $all
+     * Find files which have not been checked recently.
      *
-     * @return DepositFile[]
+     * @param bool $all
+     *
+     * @return Entity[]|DepositFile[]
      */
     public function findNotChecked($all = false) {
         if ($all) {
@@ -143,7 +145,9 @@ class DepositFileMapper extends Mapper {
     }
 
     /**
-     * @return DepositFile[]
+     * Find files which need to be restored.
+     *
+     * @return Entity[]|DepositFile[]
      */
     public function findRestoreQueue() {
         $sql = 'SELECT * FROM ' . self::TBL . " WHERE (`pln_status` IN ('restore', 'restore-error')) AND (`lockss_status` = 'agreement') ORDER BY `id`";

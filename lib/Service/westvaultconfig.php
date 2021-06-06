@@ -29,7 +29,7 @@ class WestVaultConfig {
     /**
      * Build the config manager.
      *
-     * @param type $appName
+     * @param string $appName
      */
     public function __construct(IConfig $config, $appName) {
         $this->config = $config;

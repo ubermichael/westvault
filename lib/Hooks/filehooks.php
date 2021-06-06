@@ -68,13 +68,16 @@ class FileHooks {
      *
      * @todo move this to a new service so it isn't duplicated everywhere.
      *
-     * @param type $algorithm
+     * @param string $algorithm
      *
      * @return string
      */
     private function hash($algorithm, Node $file) {
         $context = hash_init($algorithm);
         $handle = fopen($this->config->getSystemValue('datadirectory') . $file->getPath(), 'r');
+        if( ! $handle) {
+            throw new \Exception("Cannot read " . $this->config->getSystemValue('datadirectory') . $file->getPath());
+        }
         while (($data = fread($handle, 64 * 1024))) {
             hash_update($context, $data);
         }
