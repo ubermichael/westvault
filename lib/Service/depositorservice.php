@@ -90,7 +90,7 @@ class DepositorService {
         $entry = $atom->createElementNS('http://www.w3.org/2005/Atom', 'entry');
         $atom->appendChild($entry);
         $entry->setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns:pkp', $ns->getNamespace('pkp'));
-        $entry->appendChild($atom->createElement('email', $user->getEMailAddress()));
+        $entry->appendChild($atom->createElement('email', $user->getEMailAddress() ?? ''));
         $entry->appendChild($atom->createElement('title', $depositFile->filename()));
         $entry->appendChild($atom->createElement('id', 'urn:uuid:' . $depositFile->getUuid()));
         $entry->appendChild($atom->createElement('updated', strftime('%FT%TZ')));
@@ -127,6 +127,7 @@ class DepositorService {
         }
         foreach ($files as $depositFile) {
             $user = $this->manager->get($depositFile->getUserId());
+            $output->writeln('Deposit ' . $depositFile->getUuid(), OutputInterface::VERBOSITY_VERBOSE);
 
             try {
                 $atom = $this->generateDepositXml($user, $depositFile);
@@ -143,8 +144,6 @@ class DepositorService {
             } catch (Exception $ex) {
                 echo get_class($ex) . "\n" . $ex->getMessage() . "\n";
             }
-
-            return;
         }
     }
 }
