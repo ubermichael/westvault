@@ -1,15 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 /*
- *  This file is licensed under the MIT License version 3 or
- *  later. See the LICENSE file for details.
- *
- *  Copyright 2017 Michael Joyce <ubermichael@gmail.com>.
+ * (c) 2021 Michael Joyce <mjoyce@sfu.ca>
+ * This source file is subject to the GPL v2, bundled
+ * with this source code in the file LICENSE.
  */
 
 namespace OCA\WestVault\Controller;
 
-use DateTime;
+use DateTimeImmutable;
 use Exception;
 use OC\Files\Node\Root;
 use OCA\WestVault\Service\Navigation;
@@ -28,14 +29,13 @@ use OCP\IUser;
  * and refreshing the terms of use.
  */
 class ConfigController extends Controller {
-
     /**
      * @var IUser
      */
     private $user;
 
     /**
-     * @var IGroupManager 
+     * @var IGroupManager
      */
     private $groupManager;
 
@@ -61,15 +61,8 @@ class ConfigController extends Controller {
 
     /**
      * Build the controller.
-     * 
+     *
      * @param string $appName
-     * @param IRequest $request
-     * @param IUser $user
-     * @param IGroupManager $groupManager
-     * @param WestVaultConfig $config
-     * @param Navigation $navigation
-     * @param SwordClient $client
-     * @param Root $root
      */
     public function __construct($appName, IRequest $request, IUser $user, IGroupManager $groupManager, WestVaultConfig $config, Navigation $navigation, SwordClient $client, Root $root) {
         parent::__construct($appName, $request);
@@ -82,11 +75,26 @@ class ConfigController extends Controller {
     }
 
     /**
+     * Check that a user folder exists and create it if necessary.
+     *
+     * @param string $name
+     */
+    protected function checkUserFolder($name) : void {
+        $userFolder = $this->root->getUserFolder($this->user->getUID());
+
+        try {
+            $userFolder->get($name);
+        } catch (NotFoundException $e) {
+            $userFolder->newFolder($name);
+        }
+    }
+
+    /**
      * Show the configuration forms.
-     * 
+     *
      * @NoAdminRequired
      * @NoCSRFRequired
-     * 
+     *
      * @return TemplateResponse
      */
     public function index() {
@@ -109,23 +117,25 @@ class ConfigController extends Controller {
             'pln_user_cleanup' => $this->config->getUserValue('pln_user_cleanup', $this->user->getUID(), false),
             'pln_user_agreed' => unserialize($this->config->getUserValue('pln_user_agreed', $this->user->getUID(), 'N;')),
         ];
-        return new TemplateResponse($this->appName, 'config', $params);  // templates/config.php        
+
+        return new TemplateResponse($this->appName, 'config', $params);  // templates/config.php
     }
 
     /**
      * Refresh the terms of use.
-     * 
+     *
      * @NoAdminRequired
-     * 
+     *
      * @return DataResponse
      */
     public function refresh() {
-        if (!$this->client) {
-            return new DataResponse(array(
+        if ( ! $this->client) {
+            return new DataResponse([
                 'status' => 'failure',
                 'result' => 'Cannot create sword client.',
-            ));
+            ]);
         }
+
         try {
             $newTerms = $this->client->getTermsOfUse($this->user);
             $updated = $this->client->getTermsUpdated($this->user);
@@ -136,22 +146,23 @@ class ConfigController extends Controller {
                 $this->config->setUserValue('pln_terms_of_use_updated', $this->user->getUID(), $updated);
             }
         } catch (Exception $ex) {
-            return new DataResponse(array(
+            return new DataResponse([
                 'status' => 'failure',
                 'result' => 'Error refreshing the terms of use: ' . $ex->getMessage() . ' at ' . $ex->getFile() . '#' . $ex->getLine(),
-            ));
+            ]);
         }
-        return new DataResponse(array(
+
+        return new DataResponse([
             'status' => 'success',
             'result' => $result,
             'terms' => $newTerms,
             'updated' => $updated,
-        ));
+        ]);
     }
 
     /**
      * Save site configuration settings.
-     * 
+     *
      * @return DataResponse
      */
     public function saveSite() {
@@ -164,27 +175,29 @@ class ConfigController extends Controller {
                 'message' => "Error saving settings. Some settings may not have been saved. \n" . $e->getMessage(),
             ]);
         }
+
         return new DataResponse([
-            'message' => 'The settings have been saved.'
+            'message' => 'The settings have been saved.',
         ]);
     }
 
     /**
      * Save the user terms of use agreement.
-     * 
+     *
      * @NoAdminRequired
-     * 
+     *
      * @return DataResponse
      */
     public function saveAgreement() {
         try {
-            if ($this->request->getParam('pln_user_agreed') === 'agree') {
-                $this->config->setUserValue('pln_user_agreed', $this->user->getUID(), serialize(new DateTime()));
+            if ('agree' === $this->request->getParam('pln_user_agreed')) {
+                $this->config->setUserValue('pln_user_agreed', $this->user->getUID(), serialize(new DateTimeImmutable()));
             } else {
                 $this->config->setUserValue('pln_user_agreed', $this->user->getUID(), serialize(null));
             }
+
             return new DataResponse([
-                'message' => 'The settings have been saved.'
+                'message' => 'The settings have been saved.',
             ]);
         } catch (Exception $e) {
             return new DataResponse([
@@ -194,25 +207,11 @@ class ConfigController extends Controller {
     }
 
     /**
-     * Check that a user folder exists and create it if necessary.
-     * 
-     * @param string $name
-     */
-    protected function checkUserFolder($name) {
-        $userFolder = $this->root->getUserFolder($this->user->getUID());
-        try {
-            $userFolder->get($name);
-        } catch (NotFoundException $e) {
-            $userFolder->newFolder($name);
-        }
-    }
-
-    /**
-     * Save the user settings and create the preservation and restoration 
+     * Save the user settings and create the preservation and restoration
      * folders if necessary.
-     * 
+     *
      * @NoAdminRequired
-     * 
+     *
      * @return DataResponse
      */
     public function saveUser() {
@@ -226,7 +225,7 @@ class ConfigController extends Controller {
             $this->checkUserFolder($this->config->getUserValue('pln_user_restored_folder', $this->user->getUID()));
 
             return new DataResponse([
-                'message' => 'The settings have been saved.'
+                'message' => 'The settings have been saved.',
             ]);
         } catch (Exception $e) {
             return new DataResponse([
@@ -234,5 +233,4 @@ class ConfigController extends Controller {
             ]);
         }
     }
-
 }

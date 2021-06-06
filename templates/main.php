@@ -1,5 +1,5 @@
-<?php
-    script('westvault', 'script');
+<?php declare(strict_types=1);
+script('westvault', 'script');
     style('westvault', 'style');
 ?>
 
@@ -11,7 +11,9 @@
 
     <div id="app-content">
         <div id="app-content-wrapper">
-            <?php if (isset($_['message'])) { echo $_['message']; } ?>
+            <?php if (isset($_['message'])) {
+    echo $_['message'];
+} ?>
             <?php print_unescaped($this->inc('main.content')); ?>
         </div>
     </div>

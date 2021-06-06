@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 /*
- *  This file is licensed under the MIT License version 3 or
- *  later. See the LICENSE file for details.
- *
- *  Copyright 2017 Michael Joyce <ubermichael@gmail.com>.
+ * (c) 2021 Michael Joyce <mjoyce@sfu.ca>
+ * This source file is subject to the GPL v2, bundled
+ * with this source code in the file LICENSE.
  */
 
 namespace OCA\WestVault\Service;
@@ -15,20 +16,17 @@ use GuzzleHttp\Exception\ServerException;
 use OC\Files\Node\Root;
 use OCA\WestVault\Db\DepositFile;
 use OCA\WestVault\Db\DepositFileMapper;
-use OCA\WestVault\Service\SwordClient;
-use OCA\WestVault\Service\WestVaultConfig;
 use OCA\WestVault\Util\Namespaces;
+use OCP\IGroupManager;
 use OCP\IURLGenerator;
 use OCP\IUserManager;
-use OCP\IGroupManager;
 
 /**
- * Description of depositorservice
+ * Description of depositorservice.
  *
  * @author Michael Joyce <ubermichael@gmail.com>
  */
 class DepositorService {
-
     /**
      * @var WestVaultConfig
      */
@@ -74,38 +72,12 @@ class DepositorService {
         $this->groupManager = $groupManager;
     }
 
-    public function run() {
-        $files = $this->mapper->findNotDeposited();
-        if (count($files) === 0) {
-            return;
-        }
-        foreach ($files as $depositFile) {
-            $user = $this->manager->get($depositFile->getUserId());
-            try {
-                $atom = $this->generateDepositXml($user, $depositFile);
-                $response = $this->client->createDeposit($user, $atom);
-                $location = $response['location'];
-                $responseXml = $response['xml'];
-                $depositFile->setDateSent(time());
-                $depositFile->setPlnStatus((string)$responseXml->xpath('//atom:category[@label="Processing State"]/@term')[0]);
-                $depositFile->setPlnUrl($location);
-                $this->mapper->update($depositFile);
-            } catch (ServerException $ex) {
-                print $ex->getMessage() . "\n";
-                print $ex->getResponse()->getBody() . "\n";
-            } catch (Exception $ex) {
-                print get_class($ex) . "\n" . $ex->getMessage() . "\n" ;
-            }
-        }
-    }
-
     /**
-     * @param DepositFile $depositFile
      * @return DOMDocument
      */
     protected function generateDepositXml(IUser $user, DepositFile $depositFile) {
         $userGroups = $this->groupManager->getUserGroups($user);
-        if(count($userGroups) !== 1) {
+        if (1 !== count($userGroups)) {
             // throw a wibbily here.
         }
         // get the first group for the user.
@@ -119,25 +91,54 @@ class DepositorService {
         $entry->appendChild($atom->createElement('email', $user->getEMailAddress()));
         $entry->appendChild($atom->createElement('title', $depositFile->filename()));
         $entry->appendChild($atom->createElement('id', 'urn:uuid:' . $depositFile->getUuid()));
-        $entry->appendChild($atom->createElement('updated', strftime("%FT%TZ")));
+        $entry->appendChild($atom->createElement('updated', strftime('%FT%TZ')));
         $meta = $atom->createElementNS($ns->getNamespace('lom'), 'meta');
         $entry->appendChild($meta);
+
         try {
             $file = $this->root->get($depositFile->getPath());
         } catch (Exception $e) {
-            die($e->getMessage());
+            exit($e->getMessage());
         }
         $content = $atom->createElementNS(
-                $ns->getNamespace('pkp'), 'pkp:content', $this->generator->linkToRouteAbsolute('westvault.page.fetch', array(
-                    'uuid' => $depositFile->getUuid()
-                ))
+            $ns->getNamespace('pkp'),
+            'pkp:content',
+            $this->generator->linkToRouteAbsolute('westvault.page.fetch', [
+                'uuid' => $depositFile->getUuid(),
+            ])
         );
         $content->setAttribute('size', $file->getSize());
         $content->setAttribute('checksumType', $depositFile->getChecksumType());
         $content->setAttribute('checksumValue', $depositFile->getChecksumValue());
         $content->setAttribute('institution', $groupKey);
         $entry->appendChild($content);
+
         return $atom;
     }
 
+    public function run() : void {
+        $files = $this->mapper->findNotDeposited();
+        if (0 === count($files)) {
+            return;
+        }
+        foreach ($files as $depositFile) {
+            $user = $this->manager->get($depositFile->getUserId());
+
+            try {
+                $atom = $this->generateDepositXml($user, $depositFile);
+                $response = $this->client->createDeposit($user, $atom);
+                $location = $response['location'];
+                $responseXml = $response['xml'];
+                $depositFile->setDateSent(time());
+                $depositFile->setPlnStatus((string) $responseXml->xpath('//atom:category[@label="Processing State"]/@term')[0]);
+                $depositFile->setPlnUrl($location);
+                $this->mapper->update($depositFile);
+            } catch (ServerException $ex) {
+                echo $ex->getMessage() . "\n";
+                echo $ex->getResponse()->getBody() . "\n";
+            } catch (Exception $ex) {
+                echo get_class($ex) . "\n" . $ex->getMessage() . "\n";
+            }
+        }
+    }
 }

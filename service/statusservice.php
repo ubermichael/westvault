@@ -1,19 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 /*
- *  This file is licensed under the MIT License version 3 or
- *  later. See the LICENSE file for details.
- *
- *  Copyright 2017 Michael Joyce <ubermichael@gmail.com>.
+ * (c) 2021 Michael Joyce <mjoyce@sfu.ca>
+ * This source file is subject to the GPL v2, bundled
+ * with this source code in the file LICENSE.
  */
 
 namespace OCA\WestVault\Service;
 
-use Exception;
 use OC\Files\Node\Root;
 use OCA\WestVault\Db\DepositFileMapper;
-use OCA\WestVault\Service\SwordClient;
-use OCA\WestVault\Service\WestVaultConfig;
 use OCP\Files\NotFoundException;
 use OCP\IURLGenerator;
 use OCP\IUserManager;
@@ -25,32 +23,31 @@ use Symfony\Component\Console\Output\OutputInterface;
  * @author Michael Joyce <ubermichael@gmail.com>
  */
 class StatusService {
-
     /**
      * @var WestVaultConfig
      */
     private $config;
-    
+
     /**
      * @var SwordClient
      */
     private $client;
-    
+
     /**
      * @var Root
      */
     private $root;
-    
+
     /**
      * @var DepositFileMapper
      */
     private $mapper;
-    
+
     /**
      * @var IURLGenerator
      */
     private $generator;
-    
+
     /**
      * @var IUserManager
      */
@@ -58,13 +55,6 @@ class StatusService {
 
     /**
      * Build the service.
-     * 
-     * @param WestVaultConfig $config
-     * @param SwordClient $client
-     * @param Root $root
-     * @param DepositFileMapper $mapper
-     * @param IURLGenerator $generator
-     * @param IUserManager $manager
      */
     public function __construct(WestVaultConfig $config, SwordClient $client, Root $root, DepositFileMapper $mapper, IURLGenerator $generator, IUserManager $manager) {
         $this->config = $config;
@@ -77,18 +67,16 @@ class StatusService {
 
     /**
      * Run the service.
-     * 
+     *
      * @todo Refactor this a bit.
-     * 
+     *
      * @param type $all
-     * @param OutputInterface $output
-     * @return null
      */
     public function run($all = false, OutputInterface $output) {
         $deleted = false;
         $files = $this->mapper->findNotChecked($all);
-        $output->writeln("Checking status of " . count($files) . " deposits.", OutputInterface::VERBOSITY_VERBOSE);
-        if (count($files) === 0) {
+        $output->writeln('Checking status of ' . count($files) . ' deposits.', OutputInterface::VERBOSITY_VERBOSE);
+        if (0 === count($files)) {
             return;
         }
         foreach ($files as $depositFile) {
@@ -96,9 +84,9 @@ class StatusService {
             $states = $this->client->statement($user, $depositFile->getPlnUrl());
             $depositFile->setDateChecked(time());
             $depositFile->setPlnStatus($states['pln']);
-            $depositFile->setLockssStatus($states['lockss']);            
+            $depositFile->setLockssStatus($states['lockss']);
             $this->mapper->update($depositFile);
-            if(($states['lockss'] === 'agreement') && ($this->config->getUserValue('pln_user_cleanup', $user->getUID(), 'b:0') === 'cleanup')) {
+            if (('agreement' === $states['lockss']) && ('cleanup' === $this->config->getUserValue('pln_user_cleanup', $user->getUID(), 'b:0'))) {
                 try {
                     $file = $this->root->get($depositFile->getPath());
                     $file->delete();

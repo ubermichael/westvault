@@ -3,6 +3,12 @@
     "description": "OwnCloud-based front end for the West Vault preservation service.",
     "type": "project",
     "license": "MIT",
+    "config": {
+        "classmap-authoritative": true,
+        "platform": {
+            "php": "7.4"
+        }
+    },
     "authors": [
         {
             "name": "Michael Joyce",

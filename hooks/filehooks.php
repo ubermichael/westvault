@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 /*
- *  This file is licensed under the MIT License version 3 or
- *  later. See the LICENSE file for details.
- *
- *  Copyright 2017 Michael Joyce <ubermichael@gmail.com>.
+ * (c) 2021 Michael Joyce <mjoyce@sfu.ca>
+ * This source file is subject to the GPL v2, bundled
+ * with this source code in the file LICENSE.
  */
 
 namespace OCA\WestVault\Hooks;
@@ -17,7 +18,6 @@ use OCA\WestVault\Service\WestVaultConfig;
 use OCP\Files\FileInfo;
 use OCP\Files\Node;
 use OCP\ILogger;
-use OCP\IUser;
 use OCP\IUserManager;
 use Ramsey\Uuid\Uuid;
 
@@ -27,7 +27,6 @@ use Ramsey\Uuid\Uuid;
  * @author Michael Joyce <ubermichael@gmail.com>
  */
 class FileHooks {
-
     /**
      * @var IUserManager
      */
@@ -55,11 +54,6 @@ class FileHooks {
 
     /**
      * Build an object with the file hooks.
-     * 
-     * @param IUserManager $manager
-     * @param WestVaultConfig $config
-     * @param Root $root
-     * @param DepositFileMapper $mapper
      */
     public function __construct(IUserManager $manager, WestVaultConfig $config, Root $root, DepositFileMapper $mapper, ILogger $logger) {
         $this->manager = $manager;
@@ -70,21 +64,12 @@ class FileHooks {
     }
 
     /**
-     * Register all the hooks for the plugin.
-     */
-    public function register() {
-        $this->root->listen('\OC\Files', 'postCreate', [$this, 'postCreate']);
-        $this->root->listen('\OC\Files', 'postDelete', [$this, 'postDelete']);
-        $this->root->listen('\OC\Files', 'postRename', [$this, 'postRename']);
-    }
-
-    /**
-     * Stream a file through a hashing function. 
-     * 
+     * Stream a file through a hashing function.
+     *
      * @todo move this to a new service so it isn't duplicated everywhere.
-     * 
+     *
      * @param type $algorithm
-     * @param Node $file
+     *
      * @return string
      */
     private function hash($algorithm, Node $file) {
@@ -95,24 +80,31 @@ class FileHooks {
         }
         $hash = hash_final($context);
         fclose($handle);
+
         return $hash;
     }
 
     /**
+     * Register all the hooks for the plugin.
+     */
+    public function register() : void {
+        $this->root->listen('\OC\Files', 'postCreate', [$this, 'postCreate']);
+        $this->root->listen('\OC\Files', 'postDelete', [$this, 'postDelete']);
+        $this->root->listen('\OC\Files', 'postRename', [$this, 'postRename']);
+    }
+
+    /**
      * Callback for the post file create hook.
-     * 
-     * @param Node $file
-     * @return null
      */
     public function postCreate(Node $file) {
-        if ($file->getType() !== FileInfo::TYPE_FILE) {
+        if (FileInfo::TYPE_FILE !== $file->getType()) {
             return;
         }
         $uid = $file->getOwner()->getUID();
-        if (!$this->config->getUserValue('pln_user_agreed', $uid, null)) {
+        if ( ! $this->config->getUserValue('pln_user_agreed', $uid, null)) {
             return;
         }
-        if (!$this->config->getUserValue('pln_user_preserved_folder', $uid, null)) {
+        if ( ! $this->config->getUserValue('pln_user_preserved_folder', $uid, null)) {
             return;
         }
         foreach ($this->config->getIgnoredPatterns($uid) as $pattern) {
@@ -122,9 +114,9 @@ class FileHooks {
         }
         $watchFolder = $this->config->getUserValue('pln_user_preserved_folder', $uid);
         $userPath = $this->root->getUserFolder($uid)->getPath();
-        $localPath = substr($file->getPath(), strlen($userPath) + 1);
+        $localPath = mb_substr($file->getPath(), mb_strlen($userPath) + 1);
 
-        if (substr($localPath, 0, strlen($watchFolder)) !== $watchFolder) {
+        if (mb_substr($localPath, 0, mb_strlen($watchFolder)) !== $watchFolder) {
             return;
         }
         $checksumType = $this->config->getAppValue('pln_site_checksum_type', 'sha1');
@@ -143,25 +135,23 @@ class FileHooks {
 
     /**
      * Callback for the post file delete hook.
-     * 
-     * @param Node $file
-     * @return null
      */
     public function postDelete(Node $file) {
         $depositFile = $this->mapper->findByPath($file->getPath());
-        if (!$depositFile || $depositFile->sent()) {
+        if ( ! $depositFile || $depositFile->sent()) {
             return;
         }
         $this->mapper->delete($depositFile);
     }
 
-    public function postRename(Node $source, Node $target) {
+    public function postRename(Node $source, Node $target) : void {
         $uid = $target->getOwner()->getUID();
         $depositFile = $this->mapper->findByPath($source->getPath());
 
-        if (!$depositFile) {
+        if ( ! $depositFile) {
             // Maybe moved into the preserved folder.
             $this->postCreate($target);
+
             return;
         }
 
@@ -174,22 +164,23 @@ class FileHooks {
             if (preg_match("/^{$pattern}$/", $target->getName())) {
                 // moved to an ignored file name.
                 $this->mapper->delete($depositFile);
+
                 return;
             }
         }
         $watchFolder = $this->config->getUserValue('pln_user_preserved_folder', $uid);
         $userPath = $this->root->getUserFolder($uid)->getPath();
-        $localPath = substr($target->getPath(), strlen($userPath) + 1);
+        $localPath = mb_substr($target->getPath(), mb_strlen($userPath) + 1);
 
-        if (substr($localPath, 0, strlen($watchFolder)) !== $watchFolder) {
+        if (mb_substr($localPath, 0, mb_strlen($watchFolder)) !== $watchFolder) {
             // moved out of the lockss preserved folder.
             $this->mapper->delete($depositFile);
+
             return;
         }
-        
+
         $depositFile->setPath($target->getPath());
-        $depositFile->setDateUploaded(time());        
+        $depositFile->setDateUploaded(time());
         $this->mapper->update($depositFile);
     }
-
 }

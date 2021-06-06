@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 /*
- *  This file is licensed under the MIT License version 3 or
- *  later. See the LICENSE file for details.
- *
- *  Copyright 2017 Michael Joyce <ubermichael@gmail.com>.
+ * (c) 2021 Michael Joyce <mjoyce@sfu.ca>
+ * This source file is subject to the GPL v2, bundled
+ * with this source code in the file LICENSE.
  */
 
 namespace OCA\WestVault\Command;
@@ -12,7 +13,6 @@ namespace OCA\WestVault\Command;
 use OCA\WestVault\AppInfo\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -21,7 +21,6 @@ use Symfony\Component\Console\Output\OutputInterface;
  * @author Michael Joyce <ubermichael@gmail.com>
  */
 class Restore extends Command {
-
     public function __construct($name = null) {
         parent::__construct($name);
     }
@@ -29,7 +28,7 @@ class Restore extends Command {
     /**
      * Configure the command and set its options and arguments.
      */
-    protected function configure() {
+    protected function configure() : void {
         parent::configure();
         $this->setName('westvault:restore');
         $this->setDescription('Restore queued deposits from LOCKSS');
@@ -37,15 +36,11 @@ class Restore extends Command {
 
     /**
      * Execute the command. Calls the RestoreService to do the heavy lifting.
-     * 
-     * @param InputInterface $input
-     * @param OutputInterface $output
      */
-    protected function execute(InputInterface $input, OutputInterface $output) {
+    protected function execute(InputInterface $input, OutputInterface $output) : void {
         $app = new Application('westvault');
         $container = $app->getContainer();
         $restorer = $container->query('RestoreService');
         $restorer->run($output);
     }
-
 }

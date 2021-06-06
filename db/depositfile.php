@@ -1,10 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 /*
- *  This file is licensed under the MIT License version 3 or
- *  later. See the LICENSE file for details.
- *
- *  Copyright 2017 Michael Joyce <ubermichael@gmail.com>.
+ * (c) 2021 Michael Joyce <mjoyce@sfu.ca>
+ * This source file is subject to the GPL v2, bundled
+ * with this source code in the file LICENSE.
  */
 
 namespace OCA\WestVault\Db;
@@ -12,12 +13,11 @@ namespace OCA\WestVault\Db;
 use OCP\AppFramework\Db\Entity;
 
 /**
- * Description of DepositFile
+ * Description of DepositFile.
  *
  * @author Michael Joyce <ubermichael@gmail.com>
  */
 class DepositFile extends Entity {
-
     /**
      * @var int
      */
@@ -93,11 +93,11 @@ class DepositFile extends Entity {
 
     /**
      * Check if the file has been sent to the PLN.
-     * 
-     * @return boolean
+     *
+     * @return bool
      */
     public function sent() {
-        return $this->plnUrl !== null;
+        return null !== $this->plnUrl;
     }
 
     /**
@@ -106,5 +106,4 @@ class DepositFile extends Entity {
     public function filename() {
         return basename($this->path);
     }
-
 }
