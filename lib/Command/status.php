@@ -49,6 +49,6 @@ class Status extends Command {
         $all = $input->getOption('all');
         $container = $app->getContainer();
         $checker = $container->query('StatusService');
-        $checker->run($all, $output);
+        $checker->run($output, $all);
     }
 }
