@@ -2,16 +2,29 @@
 <info>
     <id>westvault</id>
     <name>West Vault</name>
-    <description>OwnCloud-based front end for the West Vault preservation service.</description>
+    <description>OwnCloud-based front end for the West Vault preservation service</description>
+    <version>1.0.0</version>
     <licence>GPL</licence>
     <author>Michael Joyce</author>
-    <version>1.0.0</version>
     <namespace>WestVault</namespace>
     <category>other</category>
-    <dependencies>
-        <owncloud min-version="9.0" max-version="10.8"/>
-    </dependencies>
+    <summary>OwnCloud-based front end for the West Vault preservation service</summary>
     <types>
         <filesystem/>
     </types>
+    <documentation>
+        <user>https://coppul.ca/westvault</user>
+        <admin>https://coppul.ca/westvault</admin>
+        <developer>https://coppul.ca/westvault</developer>
+    </documentation>
+    <website>https://coppul.ca/westvault</website>
+    <repository>https://github.com/coppul/westvault</repository>
+    <bugs>https://github.com/coppul/westvault/issues</bugs>
+
+    <dependencies>
+        <php min-version="7.4"/>
+        <lib>curl</lib>
+        <lib>xml</lib>
+        <owncloud min-version="9.0" max-version="10.8"/>
+    </dependencies>
 </info>
