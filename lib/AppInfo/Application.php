@@ -37,9 +37,6 @@ class Application extends App {
     public function __construct($appName = 'westvault', array $urlParams = []) {
         parent::__construct($appName, $urlParams);
 
-        /**
-         * IContainer.
-         */
         $container = $this->getContainer();
 
         $container->registerService('Logger', fn ($c) => $c->query('ServerContainer')->getLogger());
