@@ -7,17 +7,13 @@ with this source code in the file LICENSE.
 HEADER;
 
 $finder = PhpCsFixer\Finder::create()
-    ->in(__DIR__ . '/src')
-    ->in(__DIR__ . '/tests')
-    ->in(__DIR__ . '/migrations')
-    ->notPath('Kernel.php')
+    ->in(__DIR__)
 ;
 
 $config = new PhpCsFixer\Config();
 return $config
     ->setRiskyAllowed(true)
     ->setUsingCache(true)
-    ->setCacheFile(__DIR__. '/var/cache/php_cs.cache')
     ->setFinder($finder)
     ->setRules([
         '@DoctrineAnnotation' => true,
