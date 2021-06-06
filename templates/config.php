@@ -12,8 +12,8 @@ style('westvault', 'style');
     <div id="app-content">
         <div id="app-content-wrapper">
             <?php if (isset($_['message'])) {
-                echo $_['message'];
-            } ?>
+    echo $_['message'];
+} ?>
 
             <h2>PLN Status</h2>
             <p>

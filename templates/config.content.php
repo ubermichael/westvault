@@ -37,15 +37,15 @@
         <h3>Checksum Type</h3>
         <p>
             <input <?php if ('md5' === $_['pln_site_checksum_type']) {
-                echo "checked='checked'";
-            } ?> type="radio" name="pln_site_checksum_type" id="pln_site_checksum_type_md5" value="md5">
+    echo "checked='checked'";
+} ?> type="radio" name="pln_site_checksum_type" id="pln_site_checksum_type_md5" value="md5">
             <label for="pln_site_checksum_type_md5">MD5</label><br> <em>Use message digest algorithm for calculating
                 checksums.</em>
         </p>
         <p>
             <input <?php if ('sha1' === $_['pln_site_checksum_type']) {
-                echo "checked='checked'";
-            } ?> type="radio" name="pln_site_checksum_type" id="pln_site_checksum_type_sha1" value="sha1">
+    echo "checked='checked'";
+} ?> type="radio" name="pln_site_checksum_type" id="pln_site_checksum_type_sha1" value="sha1">
             <label for="pln_site_checksum_type_sha1">SHA-1</label><br> <em>Use secure hash algorithm 1 for calculating
                 checksums.</em>
         </p>
@@ -72,9 +72,11 @@
         <blockquote>
             <?php if ('md5' === $_['pln_site_checksum_type']) { ?>
                 <b>MD5</b>: Use message digest algorithm for calculating checksums.
-            <?php } else if ('sha1' === $_['pln_site_checksum_type']) { ?>
+            <?php } else {
+    if ('sha1' === $_['pln_site_checksum_type']) { ?>
                 <b>SHA-1</b>: Use secure hash algorithm 1 for calculating checksums.
-            <?php } ?>
+            <?php }
+} ?>
         </blockquote>
 
         <h4>Staging server endpoint</h4>
@@ -112,8 +114,8 @@
     <p>
         <label for="pln_user_cleanup">Remove completed deposits</label>
         <input <?php if ('cleanup' === $_['pln_user_cleanup']) {
-            echo 'checked="checked"';
-        } ?> type="checkbox" name="pln_user_cleanup" id="pln_user_cleanup" value="cleanup" /><br> <em>Remove files once
+    echo 'checked="checked"';
+} ?> type="checkbox" name="pln_user_cleanup" id="pln_user_cleanup" value="cleanup" /><br> <em>Remove files once
             they've been deposited to LOCKSS. Leave this unchecked if you would like to clean up the folder
             manually.</em>
     </p>
