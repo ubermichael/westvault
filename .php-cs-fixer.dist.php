@@ -8,6 +8,7 @@ HEADER;
 
 $finder = PhpCsFixer\Finder::create()
     ->in(__DIR__)
+    ->notPath('vendor')
 ;
 
 $config = new PhpCsFixer\Config();
