@@ -17,7 +17,6 @@
     ],
     "require": {
         "php": "7.4.*",
-        "ramsey/uuid": "^4.1",
-        "guzzlehttp/guzzle": "^7.0"
+        "ramsey/uuid": "^4.1"
     }
 }
