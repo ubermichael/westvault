@@ -72,7 +72,7 @@ class StatusService {
      *
      * @param bool $all
      */
-    public function run(OutputInterface $output, $all = false) {
+    public function run(OutputInterface $output, $all = false) : void {
         $deleted = false;
         $files = $this->mapper->findNotChecked($all);
         $output->writeln('Checking status of ' . count($files) . ' deposits.', OutputInterface::VERBOSITY_VERBOSE);

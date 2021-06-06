@@ -42,7 +42,7 @@ class Namespaces {
     public function getNamespace($prefix) {
         $constant = __CLASS__ . '::' . mb_strtoupper($prefix);
         if ( ! defined($constant)) {
-            return null;
+            return;
         }
 
         return constant($constant);

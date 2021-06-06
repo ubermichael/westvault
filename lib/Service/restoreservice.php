@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace OCA\WestVault\Service;
 
+use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use OC\Files\Node\Root;
@@ -71,8 +72,6 @@ class RestoreService {
      * Fetch a deposit from the staging server and store it in a temporary file.
      * Returns the path to the temporary file.
      *
-     * @param DepositFile $depositFile
-     *
      * @return ?string
      */
     public function fetchFile(DepositFile $depositFile, OutputInterface $output) {
@@ -91,23 +90,21 @@ class RestoreService {
             $depositFile->setPlnStatus('restore-error');
             $this->mapper->update($depositFile);
 
-            return null;
+            return;
         }
 
         return $filepath;
     }
 
     /**
-     * @param DepositFile $depositFile
      * @param string $filepath
-     * @param OutputInterface $output
      *
-     * @return false|resource|null
+     * @return null|false|resource
      */
     public function verifyChecksum(DepositFile $depositFile, $filepath, OutputInterface $output) {
         $handle = fopen($filepath, 'rb');
-        if( ! $handle) {
-            throw new \Exception("Cannot read " . $this->config->getSystemValue('datadirectory') . $file->getPath());
+        if ( ! $handle) {
+            throw new Exception('Cannot read ' . $this->config->getSystemValue('datadirectory') . $file->getPath());
         }
         $hashContext = hash_init($depositFile->getChecksumType());
         while ($data = fread($handle, 1024 * 64)) {
@@ -119,7 +116,7 @@ class RestoreService {
             $output->writeln("Hash mismatch. Expected {$depositFile->getChecksumValue()} got {$hash}");
             $this->mapper->update($depositFile);
 
-            return null;
+            return;
         }
         rewind($handle);
 
@@ -127,9 +124,7 @@ class RestoreService {
     }
 
     /**
-     * @param DepositFile $depositFile
      * @param resource $handle
-     * @param OutputInterface $output
      *
      * @throws \OCP\Files\NotPermittedException
      * @throws \OC\User\NoUserException
@@ -148,8 +143,6 @@ class RestoreService {
     }
 
     /**
-     * @param OutputInterface $output
-     *
      * @throws \OCP\Files\NotPermittedException
      * @throws \OC\User\NoUserException
      */

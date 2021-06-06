@@ -10,6 +10,7 @@ declare(strict_types=1);
 
 namespace OCA\WestVault\Hooks;
 
+use Exception;
 use OC\Files\Node\File;
 use OC\Files\Node\Root;
 use OCA\WestVault\Db\DepositFile;
@@ -75,8 +76,8 @@ class FileHooks {
     private function hash($algorithm, Node $file) {
         $context = hash_init($algorithm);
         $handle = fopen($this->config->getSystemValue('datadirectory') . $file->getPath(), 'r');
-        if( ! $handle) {
-            throw new \Exception("Cannot read " . $this->config->getSystemValue('datadirectory') . $file->getPath());
+        if ( ! $handle) {
+            throw new Exception('Cannot read ' . $this->config->getSystemValue('datadirectory') . $file->getPath());
         }
         while (($data = fread($handle, 64 * 1024))) {
             hash_update($context, $data);
@@ -99,7 +100,7 @@ class FileHooks {
     /**
      * Callback for the post file create hook.
      */
-    public function postCreate(Node $file) {
+    public function postCreate(Node $file) : void {
         if (FileInfo::TYPE_FILE !== $file->getType()) {
             return;
         }
@@ -139,7 +140,7 @@ class FileHooks {
     /**
      * Callback for the post file delete hook.
      */
-    public function postDelete(Node $file) {
+    public function postDelete(Node $file) : void {
         $depositFile = $this->mapper->findByPath($file->getPath());
         if ( ! $depositFile || $depositFile->sent()) {
             return;

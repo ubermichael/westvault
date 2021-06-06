@@ -21,6 +21,7 @@ use OCP\IGroupManager;
 use OCP\IURLGenerator;
 use OCP\IUser;
 use OCP\IUserManager;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Description of depositorservice.
@@ -79,7 +80,7 @@ class DepositorService {
     protected function generateDepositXml(IUser $user, DepositFile $depositFile) {
         $userGroups = $this->groupManager->getUserGroups($user);
         if (1 !== count($userGroups)) {
-            throw new \Exception('User ' . $user->getDisplayName() . ' belongs to multiple groups. Cannot process deposits.');
+            throw new Exception('User ' . $user->getDisplayName() . ' belongs to multiple groups. Cannot process deposits.');
         }
         // get the first group for the user.
         $groupKey = array_keys($userGroups)[0];
@@ -108,7 +109,7 @@ class DepositorService {
                 'uuid' => $depositFile->getUuid(),
             ])
         );
-        $content->setAttribute('size', $file->getSize());
+        $content->setAttribute('size', (string) $file->getSize());
         $content->setAttribute('checksumType', $depositFile->getChecksumType());
         $content->setAttribute('checksumValue', $depositFile->getChecksumValue());
         $content->setAttribute('institution', $groupKey);
@@ -117,9 +118,11 @@ class DepositorService {
         return $atom;
     }
 
-    public function run() : void {
+    public function run(OutputInterface $output) : void {
         $files = $this->mapper->findNotDeposited();
         if (0 === count($files)) {
+            $output->writeln('Nothing to deposit.', OutputInterface::VERBOSITY_VERBOSE);
+
             return;
         }
         foreach ($files as $depositFile) {
@@ -140,6 +143,8 @@ class DepositorService {
             } catch (Exception $ex) {
                 echo get_class($ex) . "\n" . $ex->getMessage() . "\n";
             }
+
+            return;
         }
     }
 }

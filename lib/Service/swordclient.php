@@ -48,8 +48,6 @@ class SwordClient {
 
     /**
      * Build the client.
-     *
-     * @param WestVaultConfig $config
      */
     public function __construct(WestVaultConfig $config, ILogger $logger) {
         $this->config = $config;
@@ -235,9 +233,9 @@ class SwordClient {
      *
      * @param string $plnUrl
      *
-     * @return ?string
      * @throws Exception|GuzzleException
      *
+     * @return ?string
      */
     public function restoreUrl(IUser $user, $plnUrl) {
         if ( ! $this->isAccepting($user)) {
@@ -252,7 +250,7 @@ class SwordClient {
         $this->ns->registerNamespaces($xml);
         $elements = $xml->xpath('//sword:originalDeposit');
         if ( ! $elements || count($elements) < 1) {
-            return null;
+            return;
         }
         if (count($elements) > 1) {
             throw new Exception('Multiple content items in deposits are not supported.');

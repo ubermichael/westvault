@@ -41,7 +41,7 @@ class Deposit extends Command {
         $container = $app->getContainer();
 
         try {
-            $container->query('DepositService')->run();
+            $container->query('DepositService')->run($output);
         } catch (Exception $e) {
             $output->write($e->getMessage());
         }
