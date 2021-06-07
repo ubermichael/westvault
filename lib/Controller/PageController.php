@@ -56,7 +56,7 @@ class PageController extends Controller {
      *
      * @param type $AppName
      */
-    public function __construct($AppName, IRequest $request, IUser $user, Navigation $navigation, WestVaultConfig $config, DepositFileMapper $mapper, Root $root) {
+    public function __construct($AppName, IRequest $request, ?IUser $user, Navigation $navigation, WestVaultConfig $config, DepositFileMapper $mapper, Root $root) {
         parent::__construct($AppName, $request);
         $this->user = $user;
         $this->navigation = $navigation;
